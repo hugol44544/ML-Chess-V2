@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+  <!--tab name-->
+  <title>ML:Chess 2.0</title>
+  <link rel="icon" type="image/x-icon" href="https://s3.getstickerpack.com/storage/uploads/sticker-pack/genshin-klee/sticker_5.png?2ef2940dcf8dc40f0880359c4da13c4e&d=200x200">
+
+  <link href="style.css" rel="stylesheet" type="text/css">
+  <script src="script.js"></script>
+</head>
+
+<body onload="makeBoard()"> <!--calls makeBoard() function-->
+
+  <!--header-->
+  <div class="TitleName">
+    <h1>ML : Chess</h1>
+  </div>
+
+  <!--navigation's 3 buttons-->
+  <div class="Buttons">
+
+    <!--rules dropdown-->
+    <div class="InfoButtonDropdown">
+      <button type="button" id="info">Info</button>
+      <div class="WebpageLinks">
+        <a href="index.html">Home</a>
+        <a href="rules.html">Rules</a>
+        <a href="movement">Movement</a>
+      </div>
+    </div>
+
+    <!--Audio Buttons (not in a div): Start, Confirm, Reset-->
+    <!--<button type="button" onclick="audio(true)" id="start">Start</button>
+    <button type="button" onclick="audio(false)" id="stop">Confirm</button>-->
+    <button type="button" onclick="startingTile = move(phase, startingTile)" id="stop">Confirm</button>
+    <button type="button" onclick="makeBoard()">Reset</button>
+  </div>
+  
+  <br>
+  <!--Audio Directions: White Box w/ Black Border-->
+  <div class="directions">
+    <input type = "text" placeholder = "enter tile position" id = "tile">
+    <!--
+    <div id="directions" class="nocenter">
+      <strong>WHITE</strong> - Press <strong>START</strong> and state the position of the piece you want to move then
+      press <strong>STOP</strong>.
+    </div>
+    <p id="display">Selected Position: <strong>None</strong></p>-->
+  </div>
+
+  <br>
+
+  <!--Board-->
+  <div class="board" id="board"></div>
+
+  <br>
+  
+  <footer>
+    footer: shoutout to Mia Lambert!!
+
+  </footer>
+</body>
+
+</html>

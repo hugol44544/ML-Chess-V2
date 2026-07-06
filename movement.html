@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+  <!--tab name-->
+  <title>ML:Chess 2.0</title>
+  <link rel="icon" type="image/x-icon" href="https://s3.getstickerpack.com/storage/uploads/sticker-pack/genshin-klee/sticker_5.png?2ef2940dcf8dc40f0880359c4da13c4e&d=200x200">
+
+  <link href="style.css" rel="stylesheet" type="text/css">
+  <script src="script.js"></script>
+</head>
+
+<body>
+
+  <!--Header-->
+  <div class="ChessTitle">
+    <h1>Chess</h1>
+  </div>
+
+  <br>
+
+  <!--Buttons-->
+  <div class="Buttons">
+
+    <!--Rules Dropdown-->
+    <div class="InfoButtonDropdown">
+      <button type="button" id="info">Info</button>
+      <div class="WebpageLinks">
+        <a href="index.html">Home</a>
+        <a href="rules.html">Rules</a>
+        <a href="movement">Movement</a>
+      </div>
+    </div>
+  </div>
+
+  <br>
+
+  <!--Movement Webpage Info: Describe Pieces' Possible Movements----->
+  <div class="movementrule">
+    <!--Pawn-->
+    <div class="piecemovement">
+
+      <div class="titleimg">
+        <h3>Pawn</h3>
+        <img src="chessPieces/whitePieces/w_pawn.svg">
+      </div>
+
+      <div class="drop">
+        <div class="text">Pawns move one square forward in a straight line and <b>cannot move</b> horizontally or
+          backwards at any point of the game.<br>However, there are 2 <i>exceptions</i>:<br><br><b>1)</b> At a pawn's
+          inital location, they can move forward 2 spaces rather than 1<br><br><b>2)</b>The Player can choose to move
+          forward or diagonally when an opponent piece is diagonally forward of the pawn</div>
+      </div>
+    </div>
+
+    <!--King-->
+    <div class="piecemovement">
+
+      <div class="titleimg">
+        <h3>King</h3>
+        <img src="chessPieces/whitePieces/w_king.svg">
+      </div>
+
+      <div class="drop">
+        <div class="text">The King is only allowed to move <b>a single space horizontally, vertically or
+            diagonally</b>.The king cannot move to a space that would cause a check or checkmate</div>
+      </div>
+    </div>
+
+    <!--Queen-->
+    <div class="piecemovement">
+
+      <div class="titleimg">
+        <h3>Queen</h3>
+        <img src="chessPieces/whitePieces/w_queen.svg">
+      </div>
+
+      <div class="drop">
+        <div class="text">The Queen is an extremely versatile piece as it is able to move
+          <b>diagonally, horizontally, or vertically</b>. The queen cannot move through pieces of the same color and
+          captures a piece of the opposite colour by moving onto its square
+        </div>
+      </div>
+    </div>
+
+    <!--Bishop-->
+    <div class="piecemovement">
+
+      <div class="titleimg">
+        <h3>Bishop</h3>
+        <img src="chessPieces/whitePieces/w_bishop.svg">
+      </div>
+
+      <div class="drop">
+        <div class="text">Bishops are able to move in any <b>diagonal</b> direction. Each Bishop can only move on the
+          same color squares as it started the game</div>
+      </div>
+    </div>
+
+    <!--Knight-->
+    <div class="piecemovement">
+
+      <div class="titleimg">
+        <h3>Knight</h3>
+        <img src="chessPieces/whitePieces/w_knight.svg">
+      </div>
+
+      <div class="drop">
+        <div class="text">Knights are able to move in what is known as an <b>"L” shape</b> which means they can
+          move:<br><br>
+          <b>1)</b> 2 squares forward, backward, left or right, then 1 square horizontally or vertically<br><br>
+          <b>2)</b> 1 square forward, backward, left or right, then 2 squares horizontally or vertically
+        </div>
+      </div>
+    </div>
+
+    <!--Rook-->
+    <div class="piecemovement">
+
+      <div class="titleimg">
+        <h3>Rook / Castle</h3>
+        <img src="chessPieces/whitePieces/w_rook.svg">
+      </div>
+
+      <div class="drop">
+        <div class="text">Rooks are able to move to any location <b>vertically or horizontally</b> from it's location.
+          It
+          is also able to moved while castling*<br><br><i><b>Castling:</b> When King moves two squares to the right or 3
+            squares to the left in
+            which the Rook is able to jump over the King and land on the square next to it</i></div>
+      </div>
+    </div>
+
+  </div>
+
+
+</body>
+
+</html>

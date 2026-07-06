@@ -1,0 +1,283 @@
+/* colors
+light gray: #E4E0E1
+tan: #D6C0B3
+light brown: #AB886D
+dark brown: #493628
+
+old color:
+light brown: eddabe
+dark brown: d18b47
+*/
+
+/*for consistency throughout webpages and defines font heirarchy*/
+* {
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+/*body*/
+body {
+  background-color: #D6C0B3;
+}
+
+/*header title (ML:Chess)*/
+.TitleName {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 15px;
+  color: white;
+  background-color: #493628;
+}
+
+/*refers to the div all buttons were placed in (the navigations)*/
+.Buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  margin: 5px;
+  background: rgb(73, 54, 40, 0.5);
+  border-radius: 15px;
+}
+
+/*the actual button types (changes Info, Confirm, Reset)*/
+button {
+  font-size: 18px;
+  padding: 10px 20px;
+  /*top|bottom, left|right*/
+  margin: 5px;
+  color: #493628;
+  border: 2px solid #493628;
+  border-radius: 20px;
+  min-width: 100px;
+  /*ensures buttons are same width*/
+  height: 50px;
+  /*ensures buttons are same height*/
+  box-sizing: border-box;
+  /*for consistent sizing*/
+}
+
+/*how the buttons looks when hovered over*/
+button:hover {
+  color: #E4E0E1;
+  border: 2px solid #E4E0E1;
+  background-color: #493628;
+}
+
+.InfoButtonDropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/*dropdown box holding the links*/
+.WebpageLinks {
+  display: none;
+  /*links are hidden by default (will be shown when user hovers over "Info" button)*/
+  position: absolute;
+  background-color: #E4E0E1;
+  border: 2px solid #493628;
+  border-radius: 10px;
+  top: 100%;
+  /*positions dropdown below info button */
+  left: 47%;
+  /*shift dropdown box slightly to the left of the info center*/
+  transform: translateX(-50%);
+  /*shifts dropdown to left by half its width to center it */
+}
+
+/*the dropdown box w/ all links in it*/
+.WebpageLinks a {
+  color: #493628;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  padding: 5px;
+  min-width: 100px;
+  box-sizing: border-box;
+}
+
+/*dropdown box on hover. this is what allows it to be a dropdown*/
+.InfoButtonDropdown:hover .WebpageLinks {
+  display: block;
+}
+
+/*dropdown links on hover (separate links)*/
+.WebpageLinks a:hover {
+  background-color: #AB886D;
+  border-radius: 5px;
+}
+
+
+/*Turn Notice*/
+.directions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  border-radius: 15px;
+
+  background: #AB886D;
+}
+
+/*rules page
+.mainruletitle {
+  margin: 5px;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.15);
+  border: 3px solid black;
+  border-radius: 25px;
+  text-align: center;
+}
+
+.LowerButtonRules {
+  justify-content: center;
+  text-align: center;
+  display: flex;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.LowerButtonRules div {
+  flex: 1;
+  padding: 5px;
+  margin: 10px;
+  border-radius: 10px;
+  background-color: rgba(209, 140, 71, 0.75);
+}
+
+.ruletitle {
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #eddabe;
+}
+
+.listed {
+  margin: 5px;
+  flex: 1;
+  padding: 3px;
+  border-radius: 10px;
+  background-color: rgba(209, 140, 71, 0.75);
+}
+
+.listed li {
+  padding: 3px;
+}
+
+.nocenter {
+  padding: 10px;
+  text-align: center;
+}
+
+/*Movement
+.piecemovement {
+  border: 3px solid black;
+  margin: 10px;
+}
+
+.titleimg {
+  justify-content: center;
+  text-align: center;
+}
+
+.titleimg img {
+  height: 25%;
+  width: auto;
+}
+
+.text {
+  margin: 25px;
+}
+
+
+/*---Board:---*/
+/*section containing the board*/
+.board {
+  display: flex;
+  flex-direction: column;
+  /*ensures each label number is a new row*/
+  text-align: center;
+  /*ensures text and img is centerd vertically*/
+  align-items: center;
+  /*centers overall board*/
+  padding: 10px;
+}
+
+/*can be differenciated by label numbers*/
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+/*light grids*/
+.color0,
+.color2 {
+  /*background-color: #d9b188;*/
+  background-color: #e8ba8d;
+
+}
+
+/*light grids hover*/
+.color0:hover,
+.color2:hover {
+  background-color: #bd8678;
+}
+
+/*dark grids*/
+.color1 {
+  /*background-color: #af7f4f;*/
+  background-color: #a57545;
+
+}
+
+/*dark grids hover*/
+.color1:hover {
+  background-color: #a86451;
+}
+
+/* all grids */
+.square {
+  width: 75px;
+  height: 75px;
+  outline: 2px solid #493628;
+  display: flex;
+  flex-direction: column;
+  /*puts label and img on separate lines*
+  justify-content: center;
+  align-items: center;*/
+  text-align: center;
+  position: relative;
+  padding: 3px;
+}
+
+/* piece images resized to fit grid */
+.square img {
+  height: 65%;
+  object-fit: contain;
+  padding: 3px;
+}
+
+/*labels at the top of each grid*/
+.label {
+  align-items: top;
+  font-size: 20px;
+  border-right: 2px solid black;
+}
+
+footer {
+  color: #E4E0E1;
+  background: rgb(73, 54, 40, 0.8);
+  border: 1.5px solid #493628;
+  border-radius: 5px;
+  padding: 10px;
+  justify-content: center;
+}
+
+.selected{
+  background-color:#e2de7e;
+}
+
+.possible{
+  background-color:#c1be6c;
+}

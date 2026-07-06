@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+  <!--tab name-->
+  <title>ML:Chess 2.0</title>
+  <link rel="icon" type="image/x-icon" href="https://s3.getstickerpack.com/storage/uploads/sticker-pack/genshin-klee/sticker_5.png?2ef2940dcf8dc40f0880359c4da13c4e&d=200x200">
+
+  <link href="style.css" rel="stylesheet" type="text/css">
+  <script src="script.js"></script>
+</head>
+
+<body>
+
+  <!--Header-->
+  <div class="ChessTitle">
+    <h1>Chess</h1>
+  </div>
+
+  <br>
+
+  <!--Buttons-->
+  <div class="Buttons">
+
+    <!--Rules Dropdown-->
+    <div class="InfoButtonDropdown">
+      <button type="button" id="info">Info</button>
+      <div class="WebpageLinks">
+        <a href="index.html">Home</a>
+        <a href="rules.html">Rules</a>
+        <a href="movement.html">Movement</a>
+      </div>
+    </div>
+  </div>
+
+  <br>
+
+
+  <!--Rules Webpage Info: Contains what Start/Stop/Rest button does & general chess rules-->
+  <div class="directions">
+    <div id="directions" class="nocenter">
+      Player 1: White always goes FIRST<br><br>
+      <b>1)</b> Press START and State the Piece you want to Move then press STOP<br>
+      <b>2)</b> Press START again to State where the Piece should move to then press STOP<br><br>
+      Player 2: Repeat Steps 1 and 2
+    </div>
+  </div>
+  <br>
+
+  <!------------------>
+  <div class="ButtonRules">
+    <h2 class="mainruletitle">Buttons: What Do They Do?</h2>
+    <div class="LowerButtonRules">
+      <div>
+        <h3 class="ruletitle">Start Button:</h3>
+        <p class="innertitleinfo">This Button <b>Enables</b> the Microphone</p>
+      </div>
+      <div>
+        <h3 class="ruletitle">Stop Button:</h3>
+        <p class="innertitleinfo">This Button <b>Disables</b> the Microphone</p>
+      </div>
+      <div>
+        <h3 class="ruletitle">Reset Button:</h3>
+        <p class="innertitleinfo">This Button Resets the Chess Board</p>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <!------------------>
+  <div>
+    <h2 class="mainruletitle">General Rules</h2>
+    <div class="listed">
+      <ul>
+        <li>Player who plays the <b>White Piece</b> always goes <b>first</b></li>
+        <li>Each player takes turns to make a single move and cannot skip turns</li>
+        <li>Each piece moves in a specific way and must be legal <i>(Check "Movement under Info")</i></li>
+        <li>If Player's piece lands on an opponent’s piece, opponent's <b>captured and removed</b> from the board</li>
+        <li>Goal is to <b>checkmate</b> the opponent´s King</li>
+
+      </ul>
+    </div>
+  </div>
+
+
+</body>
+
+</html>
