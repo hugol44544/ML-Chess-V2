@@ -18,6 +18,35 @@ function checkArray(value, array) {
   return array.includes(value);
 }
 
+function tileIsEmpty(tileId){
+  let tile = document.getElementById(tileId);
+  img = tile.querySelector("img");
+  return img == null;
+}
+
+// determines whether chess piece is white or black.
+function getPieceColor(piece) {
+  // if piece contains "w_", then it is white. Otherwise, it is black.
+  // piece will be an image's "src" attribute.
+  let color = "white";
+  if (piece.indexOf("w_") == -1){
+    color = "black";
+  }
+  return color;
+}
+
+// Function used by horizontal, vertical, and diagonal movement methods.
+// Returns the possibleMoves array, adding a tile that we found a piece on if that piece is an enemy
+function addTileDetermination(pieceSelected, pieceFound, pieceFoundId, pieceFoundTile, possibleMoves){
+  if(pieceFound != null){
+    if(getPieceColor(pieceSelected) != getPieceColor(pieceFound.src)){
+      possibleMoves.push(pieceFoundId);
+      pieceFoundTile.classList.add("possible");
+    }
+  }
+  return possibleMoves;
+}
+
 // function to create the chess board.
 function makeBoard() {
   let board = getElement("board");
@@ -101,7 +130,6 @@ function verticalMovement(startPosition, loopStop, accumulatorValue, piece) {
 
   // accumulator that will determine when to end the loop.
   let count = number + accumulatorValue;
-  let img = null; // tracks if we find an img on a potential move tile, aka a piece
 
   // loop to gather the id of tiles that can be moved to
   while (count != loopStop) {
@@ -109,8 +137,7 @@ function verticalMovement(startPosition, loopStop, accumulatorValue, piece) {
     tile = document.getElementById(id);
 
     // if there is an img in the tile we are checking as a potential move, there is a piece there & the loop ends prematurely.
-    img = tile.querySelector("img");
-    if(img != null){
+    if(tileIsEmpty(id) == false){
       break;
     }
 
@@ -142,16 +169,14 @@ function horizontalMovement(startPosition, loopStop, accumulatorValue, piece){
 
   // count variable keeps track of what letter we are currently at.
   let count = letterPosition + accumulatorValue;
-  let img = null;
 
   // loop that gathers the id of all potential tiles that can be moved to
   while (count != loopStop) {
     id = letters[count] + number;
     tile = document.getElementById(id);
-    img = tile.querySelector("img");
 
     // if there is an img in the tile we are checking as a potential move, there is a piece there & the loop ends prematurely.
-    if(img != null){
+    if(tileIsEmpty(id) == false){
       break;
     }
 
@@ -183,16 +208,14 @@ function diagonalMovement(startPosition, loopStopLetter, loopStopNumber, accumul
   let letterPosition = letters.indexOf(letter);
   let numberAccumulator = parseInt(startPosition[1]) + accumulatorValueNumber;
   let letterAccumulator = letterPosition + accumulatorValueLetter;
-  let img = null;
 
   // important to note that since working with letters and numbers means we have different loop stopping values, we need to check both to prevent errors.
   while (letterAccumulator != loopStopLetter && numberAccumulator != loopStopNumber) {
     id = letters[letterAccumulator] + numberAccumulator;
     tile = document.getElementById(id);
-    img = tile.querySelector("img");
 
     // if there is an img in the tile we are checking as a potential move, there is a piece there & the loop ends prematurely.
-    if(img != null){
+    if(tileIsEmpty(id) == false){
       break;
     }
 
@@ -210,29 +233,6 @@ function diagonalMovement(startPosition, loopStopLetter, loopStopNumber, accumul
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-// determines whether chess piece is white or black.
-function getPieceColor(piece) {
-  // if piece contains "w_", then it is white. Otherwise, it is black.
-  // piece will be an image's "src" attribute.
-  let color = "white";
-  if (piece.indexOf("w_") == -1){
-    color = "black";
-  }
-  return color;
-}
-
-// Function used by horizontal, vertical, and diagonal movement methods.
-// Returns the possibleMoves array, adding a tile that we found a piece on if that piece is an enemy
-function addTileDetermination(pieceSelected, pieceFound, pieceFoundId, pieceFoundTile, possibleMoves){
-  if(pieceFound != null){
-    if(getPieceColor(pieceSelected) != getPieceColor(pieceFound.src)){
-      possibleMoves.push(pieceFoundId);
-      pieceFoundTile.classList.add("possible");
-    }
-  }
-  return possibleMoves;
-}
 
 // method that gets all the possible moves. Highlights each, and returns an array of all the possible moves (including the selected tile).
 function getPossibleMoves(starting, piece, p) {
@@ -319,23 +319,52 @@ function getPossibleMoves(starting, piece, p) {
       // determines starting row of pawn. white pawns start on row 2, black pawns start on row 7.
       let startingRow = (pawnColor == "white" ? 2 : 7);
 
-      // checks if pawn is in its starting row. If yes, it can move 2 spaces forward.
-      if (number == startingRow) {
-        // 2 spaces forward in opposite direction based on pawn color.
-        let id = letter + (number + 2 * direction);
-        let tile = document.getElementById(id);
+      // if pawn is not in starting row, it can only move 1 space forward.
+
+      // NOTE: Currently, if a pawn is in the top or bottom row, pawn movement fails because the tiles it should move to do not exist. This will be handled when pawn promotion is developed.
+      let id = letter + (number + 1 * direction);
+      let tile = document.getElementById(id);
+      if(tileIsEmpty(id)){
         tile.classList.add("possible");
         possibleMoves.push(id);
       }
-      // if pawn is not in starting row, it can only move 1 space forward.
-      let id = letter + (number + 1 * direction);
-      let tile = document.getElementById(id);
-      tile.classList.add("possible");
-      possibleMoves.push(id);
+
+      // checks if pawn is in its starting row. If yes, it can move 2 spaces forward.
+      if (number == startingRow && tileIsEmpty(id)) {
+        // 2 spaces forward in opposite direction based on pawn color.
+        id = letter + (number + 2 * direction);
+        tile = document.getElementById(id);
+        if(tileIsEmpty(id)){
+          tile.classList.add("possible");
+          possibleMoves.push(id);
+        }
+      }
 
       // checks if pawn can capture a piece diagonally.
-      // to be done later
-      // hi jenny jen jen pen penny ben ben, it's 2026 i think it is later now
+      let leftCheck = letters.indexOf(letter)+1 < letters.length;
+      let rightCheck = letters.indexOf(letter)-1 > -1;
+      let checks = [leftCheck,rightCheck];
+      let factor = 0;
+      for(let i = 0;i < checks.length;i++){
+        factor = (i == 0 ? 1 : -1);
+        console.log(checks[i]);
+        if(checks[i]){
+          console.log(letters[letters.indexOf(letter)+factor])
+          console.log((number + 1 * direction));
+          id = letters[letters.indexOf(letter)+factor] + (number + 1 * direction);
+          console.log(id);
+          if(tileIsEmpty(id) == false){
+            let currentTile = document.getElementById(starting);
+            let currentPiece = currentTile.querySelector("img");
+            tile = document.getElementById(id);
+            let targetPiece = tile.querySelector("img");
+            if(getPieceColor(targetPiece.src) != getPieceColor(currentPiece.src)){
+              tile.classList.add("possible");
+              possibleMoves.push(id);
+            }
+          }
+        }
+      }
 
       break;
   }
