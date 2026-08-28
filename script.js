@@ -89,18 +89,20 @@ function makeBoard() {
       // If-statement chain below here are JUST FOR TESTING THE PIECES AND MAKING SURE THEY WORK AS INTENDED. The if-statement chain will be removed once the pieces are thoroughly tested.
       // This also means removing the image = ""; right below, since that is used to override the board putting the pieces in the right places at the beginning of the game.
       image = "";
-      if (position == "e4") {
+      if (position == "c7") {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_rook.svg"></div>`;
       } else if (position == "b2") {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_pawn.svg"></div>`;
-      } else if (position == "b7") {
+      } else if (position == "a7") {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_pawn.svg"></div>`;
-      } else if(position == "g5"){
+      } else if(position == "f2"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_king.svg"></div>`;
-      } else if(position == "e5"){
+      } else if(position == "c2"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_bishop.svg"></div>`;
-      } else if(position == "c5"){
+      } else if(position == "e2"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_queen.svg"></div>`;
+      } else if(position == "e4"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_knight.svg"></div>`;
       } else {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
       }
@@ -133,15 +135,14 @@ function verticalMovement(startPosition, loopStop, accumulatorValue, piece) {
 
   // loop to gather the id of tiles that can be moved to
   while (count != loopStop) {
-    id = letter + count;
-    tile = document.getElementById(id);
-
     // if there is an img in the tile we are checking as a potential move, there is a piece there & the loop ends prematurely.
+    id = letter + count;
     if(tileIsEmpty(id) == false){
       break;
     }
 
     // adding current tile being iterated through to the possibleMoves array. Also adds a new class to that tile, changing its color to show it is a potential move.
+    tile = document.getElementById(id);
     possibleMoves.push(id);
     tile.classList.add("possible");
 
@@ -172,15 +173,15 @@ function horizontalMovement(startPosition, loopStop, accumulatorValue, piece){
 
   // loop that gathers the id of all potential tiles that can be moved to
   while (count != loopStop) {
-    id = letters[count] + number;
-    tile = document.getElementById(id);
 
     // if there is an img in the tile we are checking as a potential move, there is a piece there & the loop ends prematurely.
+    id = letters[count] + number;
     if(tileIsEmpty(id) == false){
       break;
     }
 
     // adding current tile being iterated through to the possibleMoves array. Also adds a new class to that tile, changing its color to show it is a potential move.
+    tile = document.getElementById(id);
     possibleMoves.push(id);
     tile.classList.add("possible");
 
@@ -255,6 +256,35 @@ function getPossibleMoves(starting, piece, p) {
       possibleMoves = possibleMoves.concat(horizontalMovement(starting, -1, -1, piece)); //Gets all the possible moves horizontally to the right of the selected tile. 
       break;
     case "knight":
+      let factors = [[1,1],[-1,1],[1,-1],[-1,-1]]; // factors manipulate the direction of the tiles from the knight, working in a similar way to quadrants in math graphs.
+      let newLetter, newNumber, newCoord, closeOrFarFactor; // closeOrFarFactor uses the ideas of "close" (closer to knight vertically) and "far" (further from knight vertically), since the knight's possible tiles are just 2 tiles mirrored in different ways
+      for(let i = 0;i < factors.length;i++){
+        for(let j = 0;j < 2;j++){ // Loop for the two aforementioned tiles
+          closeOrFarFactor = (j%2 == 0 ? [2,1] : [1,2]); // a knight's 2 core tiles are: (2 letters away & 1 number away) AND (1 letter away & 2 numbers away), which is reflected in the closeOrFarFactor
+          targetLettersIndex = letters.indexOf(letter) + closeOrFarFactor[0] * factors[i][0];
+          if(targetLettersIndex < letters.length && targetLettersIndex >= 0){ // Checks are done to ensure the letters array is not being indexed out of range; prevents errors
+            newLetter = letters[letters.indexOf(letter) + closeOrFarFactor[0] * factors[i][0]];
+            newNumber = number + closeOrFarFactor[1] * factors[i][1];
+            if(newNumber <= 8 && newNumber > 0){ // Board is from 1-8, so only numbers 1-8 are valid
+              newCoord = newLetter + newNumber;
+              // The following code determines if a target tile has a piece, and whether or not that piece is an enemy
+              if(document.getElementById(newCoord).querySelector("img") == null){
+                possibleMoves.push(newCoord);
+                newTile = document.getElementById(newCoord);
+                newTile.classList.add("possible");
+              }else{
+                image = document.getElementById(newCoord).querySelector("img");
+                currentPiece = document.getElementById(starting).querySelector("img");
+                if(getPieceColor(currentPiece.src) != getPieceColor(image.src)){
+                  possibleMoves.push(newCoord);
+                  newTile = document.getElementById(newCoord);
+                  newTile.classList.add("possible");
+                }
+              }
+            }
+          }
+        }
+      }
       break;
     case "bishop":
       // diagonalMovement function only works in one direction at a time, so they are called multiple times. Magic numbers are explained in the function definitions.
@@ -289,7 +319,8 @@ function getPossibleMoves(starting, piece, p) {
           let img = tile.querySelector("img");
 
           // checks if tile already has a piece on it. If yes, remove that label from possible moves.
-          if (img == null || img.src.indexOf("_") - 1 != piece.indexOf("_") - 1) {
+          if (img == null || getPieceColor(img.src) != getPieceColor(piece)) {
+            console.log("OK");
             tile.classList.add("possible");
             possibleMoves.push(newSquare);
           }
@@ -321,7 +352,9 @@ function getPossibleMoves(starting, piece, p) {
 
       // if pawn is not in starting row, it can only move 1 space forward.
 
-      // NOTE: Currently, if a pawn is in the top or bottom row, pawn movement fails because the tiles it should move to do not exist. This will be handled when pawn promotion is developed.
+      // NOTE: Currently, if a pawn is in the top or bottom row, pawn movement fails & an error occurs because the tile it should move to does not exist. This will be fixed when pawn promotion is added.
+
+      // Adds the tile in front of a pawn as a possible move
       let id = letter + (number + 1 * direction);
       let tile = document.getElementById(id);
       if(tileIsEmpty(id)){
@@ -341,24 +374,21 @@ function getPossibleMoves(starting, piece, p) {
       }
 
       // checks if pawn can capture a piece diagonally.
+      // left & right checks are for ensuring the letters array is not indexed out of range; prevents errors
       let leftCheck = letters.indexOf(letter)+1 < letters.length;
       let rightCheck = letters.indexOf(letter)-1 > -1;
       let checks = [leftCheck,rightCheck];
-      let factor = 0;
+      let factor = 0; // Factor determines the direction (up or down) we are looking at from the pawn (due to the pawns' different senses of "forward" depending on its color)
       for(let i = 0;i < checks.length;i++){
         factor = (i == 0 ? 1 : -1);
-        console.log(checks[i]);
         if(checks[i]){
-          console.log(letters[letters.indexOf(letter)+factor])
-          console.log((number + 1 * direction));
           id = letters[letters.indexOf(letter)+factor] + (number + 1 * direction);
-          console.log(id);
-          if(tileIsEmpty(id) == false){
+          if(tileIsEmpty(id) == false){ // Checks if there is a piece on the tiles diagonal to the pawn
             let currentTile = document.getElementById(starting);
             let currentPiece = currentTile.querySelector("img");
             tile = document.getElementById(id);
             let targetPiece = tile.querySelector("img");
-            if(getPieceColor(targetPiece.src) != getPieceColor(currentPiece.src)){
+            if(getPieceColor(targetPiece.src) != getPieceColor(currentPiece.src)){ // Checks if a piece on a diagonal tile is an enemy piece, in which case diagonal movement is possible
               tile.classList.add("possible");
               possibleMoves.push(id);
             }
