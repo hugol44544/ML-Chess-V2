@@ -143,6 +143,7 @@ function verticalMovement(startPosition, loopStop, accumulatorValue, piece) {
     }
 
     // adding current tile being iterated through to the possibleMoves array. Also adds a new class to that tile, changing its color to show it is a potential move.
+    tile = document.getElementById(id);
     possibleMoves.push(id);
     tile.classList.add("possible");
 
@@ -176,12 +177,16 @@ function horizontalMovement(startPosition, loopStop, accumulatorValue, piece){
 
     // if there is an img in the tile we are checking as a potential move, there is a piece there & the loop ends prematurely.
     id = letters[count] + number;
+<<<<<<< HEAD
     tile = document.getElementById(id);
+=======
+>>>>>>> cf264f5978c1ef291a0ec8f805ab17e7029da51f
     if(tileIsEmpty(id) == false){
       break;
     }
 
     // adding current tile being iterated through to the possibleMoves array. Also adds a new class to that tile, changing its color to show it is a potential move.
+    tile = document.getElementById(id);
     possibleMoves.push(id);
     tile.classList.add("possible");
 
@@ -320,6 +325,10 @@ function getPossibleMoves(starting, piece, p) {
 
           // checks if tile already has a piece on it. If yes, remove that label from possible moves.
           if (img == null || getPieceColor(img.src) != getPieceColor(piece)) {
+<<<<<<< HEAD
+=======
+            console.log("OK");
+>>>>>>> cf264f5978c1ef291a0ec8f805ab17e7029da51f
             tile.classList.add("possible");
             possibleMoves.push(newSquare);
           }
