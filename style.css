@@ -281,3 +281,11 @@ footer {
 .possible{
   background-color:#c1be6c;
 }
+
+/* Player turn */
+.playerTurn{
+  border:3px solid #493628;
+  color: white;
+  font-size: 24px;
+  text-align:center;
+}

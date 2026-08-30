@@ -1,6 +1,6 @@
 // each chess board column is assigned a letter. array is listed in reverse order, otherwise board is created horizontally flipped.
 let letters = ["h", "g", "f", "e", "d", "c", "b", "a"];
-// arrays to hold the images of the pieces.
+// arrays to hold the images of the pieces & put them in their correct starting positions.
 let whitePieces = ["w_rook.svg", "w_knight.svg", "w_bishop.svg", "w_king.svg", "w_queen.svg", "w_bishop.svg", "w_knight.svg", "w_rook.svg", "w_pawn.svg"];
 let blackPieces = ["b_rook.svg", "b_knight.svg", "b_bishop.svg", "b_king.svg", "b_queen.svg", "b_bishop.svg", "b_knight.svg", "b_rook.svg", "b_pawn.svg"];
 
@@ -28,23 +28,30 @@ function tileIsEmpty(tileId){
 function getPieceColor(piece) {
   // if piece contains "w_", then it is white. Otherwise, it is black.
   // piece will be an image's "src" attribute.
-  let color = "white";
-  if (piece.indexOf("w_") == -1){
-    color = "black";
-  }
-  return color;
+  return (piece.indexOf("white") != -1 ? "white" : "black");
 }
 
 // Function used by horizontal, vertical, and diagonal movement methods.
 // Returns the possibleMoves array, adding a tile that we found a piece on if that piece is an enemy
-function addTileDetermination(pieceSelected, pieceFound, pieceFoundId, pieceFoundTile, possibleMoves){
+function addTileDetermination(pieceSelected, pieceFound, pieceFoundId, possibleMoves){
   if(pieceFound != null){
     if(getPieceColor(pieceSelected) != getPieceColor(pieceFound.src)){
       possibleMoves.push(pieceFoundId);
-      pieceFoundTile.classList.add("possible");
     }
   }
   return possibleMoves;
+}
+
+function showPossibleMoves(possibleMoves){
+  for(let i = 0;i < possibleMoves.length;i++){
+    document.getElementById(possibleMoves[i]).classList.add("possible");
+  }
+}
+
+function hidePossibleMoves(possibleMoves){
+  for(let i = 0;i < possibleMoves.length;i++){
+    document.getElementById(possibleMoves[i]).classList.remove("possible");
+  }
 }
 
 // function to create the chess board.
@@ -143,16 +150,14 @@ function verticalMovement(startPosition, loopStop, accumulatorValue, piece) {
     }
 
     // adding current tile being iterated through to the possibleMoves array. Also adds a new class to that tile, changing its color to show it is a potential move.
-    tile = document.getElementById(id);
     possibleMoves.push(id);
-    tile.classList.add("possible");
 
     count += accumulatorValue;
 
   }
 
   // Returns the possibleMoves array, adding a tile that we found a piece on if that piece is an enemy
-  return addTileDetermination(piece, img, id, tile, possibleMoves)
+  return addTileDetermination(piece, img, id, possibleMoves)
   
 }
 
@@ -183,16 +188,14 @@ function horizontalMovement(startPosition, loopStop, accumulatorValue, piece){
     }
 
     // adding current tile being iterated through to the possibleMoves array. Also adds a new class to that tile, changing its color to show it is a potential move.
-    tile = document.getElementById(id);
     possibleMoves.push(id);
-    tile.classList.add("possible");
 
     count += accumulatorValue;
 
   }
 
   // Returns the possibleMoves array, adding a tile that we found a piece on if that piece is an enemy
-  return addTileDetermination(piece, img, id, tile, possibleMoves)
+  return addTileDetermination(piece, img, id, possibleMoves)
   
 }
 
@@ -224,7 +227,6 @@ function diagonalMovement(startPosition, loopStopLetter, loopStopNumber, accumul
 
     // adding current tile being iterated through to the possibleMoves array. Also adds a new class to that tile, changing its color to show it is a potential move.
     possibleMoves.push(id);
-    tile.classList.add("possible");
 
     letterAccumulator += accumulatorValueLetter;
     numberAccumulator += accumulatorValueNumber;
@@ -232,7 +234,7 @@ function diagonalMovement(startPosition, loopStopLetter, loopStopNumber, accumul
   }
   
   // Returns the possibleMoves array, adding a tile that we found a piece on if that piece is an enemy
-  return addTileDetermination(piece, img, id, tile, possibleMoves)
+  return addTileDetermination(piece, img, id, possibleMoves)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -259,7 +261,7 @@ function getPossibleMoves(starting, piece, p) {
       break;
     case "knight":
       let factors = [[1,1],[-1,1],[1,-1],[-1,-1]]; // factors manipulate the direction of the tiles from the knight, working in a similar way to quadrants in math graphs.
-      let newLetter, newNumber, newCoord, closeOrFarFactor; // closeOrFarFactor uses the ideas of "close" (closer to knight vertically) and "far" (further from knight vertically), since the knight's possible tiles are just 2 tiles mirrored in different ways
+      let newLetter, newNumber, newCoord, closeOrFarFactor, targetLettersIndex; // closeOrFarFactor uses the ideas of "close" (closer to knight vertically) and "far" (further from knight vertically), since the knight's possible tiles are just 2 tiles mirrored in different ways
       for(let i = 0;i < factors.length;i++){
         for(let j = 0;j < 2;j++){ // Loop for the two aforementioned tiles
           closeOrFarFactor = (j%2 == 0 ? [2,1] : [1,2]); // a knight's 2 core tiles are: (2 letters away & 1 number away) AND (1 letter away & 2 numbers away), which is reflected in the closeOrFarFactor
@@ -272,15 +274,11 @@ function getPossibleMoves(starting, piece, p) {
               // The following code determines if a target tile has a piece, and whether or not that piece is an enemy
               if(document.getElementById(newCoord).querySelector("img") == null){
                 possibleMoves.push(newCoord);
-                newTile = document.getElementById(newCoord);
-                newTile.classList.add("possible");
               }else{
-                image = document.getElementById(newCoord).querySelector("img");
+                foundPiece = document.getElementById(newCoord).querySelector("img");
                 currentPiece = document.getElementById(starting).querySelector("img");
-                if(getPieceColor(currentPiece.src) != getPieceColor(image.src)){
+                if(getPieceColor(currentPiece.src) != getPieceColor(foundPiece.src)){
                   possibleMoves.push(newCoord);
-                  newTile = document.getElementById(newCoord);
-                  newTile.classList.add("possible");
                 }
               }
             }
@@ -322,7 +320,6 @@ function getPossibleMoves(starting, piece, p) {
 
           // checks if tile already has a piece on it. If yes, remove that label from possible moves.
           if (img == null || getPieceColor(img.src) != getPieceColor(piece)) {
-            tile.classList.add("possible");
             possibleMoves.push(newSquare);
           }
         }
@@ -359,7 +356,6 @@ function getPossibleMoves(starting, piece, p) {
       let id = letter + (number + 1 * direction);
       let tile = document.getElementById(id);
       if(tileIsEmpty(id)){
-        tile.classList.add("possible");
         possibleMoves.push(id);
       }
 
@@ -369,7 +365,6 @@ function getPossibleMoves(starting, piece, p) {
         id = letter + (number + 2 * direction);
         tile = document.getElementById(id);
         if(tileIsEmpty(id)){
-          tile.classList.add("possible");
           possibleMoves.push(id);
         }
       }
@@ -390,7 +385,6 @@ function getPossibleMoves(starting, piece, p) {
             tile = document.getElementById(id);
             let targetPiece = tile.querySelector("img");
             if(getPieceColor(targetPiece.src) != getPieceColor(currentPiece.src)){ // Checks if a piece on a diagonal tile is an enemy piece, in which case diagonal movement is possible
-              tile.classList.add("possible");
               possibleMoves.push(id);
             }
           }
@@ -411,7 +405,9 @@ let startingTile;
 // function to move pieces.
 function move(p, st) { // p = phase of movement method, st = starting tile.
   let result, tileId, starting, chessPiece;
-
+  let playerMessage = document.getElementById("playerTurn");
+  let player = (playerMessage.innerHTML.includes("1") ? 1 : 2);
+  let possibleMoves;
   switch (p) {
     // selection phase of movement method (phase 1); user selects a tile to move a piece from.
     case 1:
@@ -421,16 +417,28 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         break;
       }
 
-      // Tiles with img elements have pieces, so if chessPiece is not null, the move operation proceeds with its selection phase.
+      // Tiles with img elements have pieces, so if chessPiece is not null, the move operation proceeds.
       starting = getElement(tileId);
       chessPiece = starting.querySelector("img"); // gets img element of tile and uses that as the piece.
-
       if (chessPiece != null) {
-        starting.classList.add("selected");
-        result = tileId;
-        phase = 2; // phase 2 = selecting where to move that piece and moves it there.
-        // method that shows possible tile movements is called here.
-        getPossibleMoves(starting.id, chessPiece.src);
+        // Final check for ensuring players can only select their own pieces.
+        let colorCheck = (playerMessage.innerHTML.includes("1") ? "white" : "black")
+        if(getPieceColor(chessPiece.src) == getPieceColor(colorCheck)){
+          starting.classList.add("selected");
+          result = tileId;
+
+          // method that gets possible moves & method that shows possible moves is called here.
+          possibleMoves = getPossibleMoves(starting.id, chessPiece.src);
+          showPossibleMoves(possibleMoves);
+
+          phase = 2; // phase 2 = selecting where to move that piece and moves it there (case 2)
+
+          // Updating player message with tile & piece selected
+          let substringFirstNumber = chessPiece.src.indexOf("_") + 1;
+          let substringSecondNumber = chessPiece.src.indexOf(".svg");
+          let pieceName = chessPiece.src.substring(substringFirstNumber, substringSecondNumber);
+          playerMessage.innerHTML = `Player ${player}: Selected ${pieceName} ${tileId} - Select a tile to move it to`;
+        }
       }
       break;
 
@@ -440,7 +448,7 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
       tileId = getElement("tile").value;
       starting = getElement(st);
       chessPiece = starting.querySelector("img");
-      let possibleMoves = getPossibleMoves(starting.id, chessPiece.src, p);
+      possibleMoves = getPossibleMoves(starting.id, chessPiece.src, p);
 
       if (checkArray(tileId, possibleMoves) == false) {
         result = st;
@@ -457,15 +465,16 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         }
         starting.removeChild(chessPiece);
         targetTile.appendChild(chessPiece);
+
+        player = (playerMessage.innerHTML.includes("1") ? 2 : 1); // If the move actually moves a piece, then the player who will move next is not the player currently moving
       }
 
-      // regardless of what happens, the originally selected tile is deselected.
+      // regardless of what happens, the originally selected tile is deselected & possible moves are removed
       starting.classList.remove("selected");
-      for (let i = 0; i < possibleMoves.length; i++) {
-        let tile = getElement(possibleMoves[i]);
-        tile.classList.remove("possible");
-      }
-      phase = 1; // phase 1 = selecting what piece to move
+      hidePossibleMoves(possibleMoves);
+      
+      phase = 1; // phase 1 = selecting what piece to move (case 1)
+      playerMessage.innerHTML = `Player ${player}: Select a tile with a piece`; // Update player message
       break;
   }
 
