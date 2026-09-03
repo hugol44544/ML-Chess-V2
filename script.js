@@ -43,13 +43,15 @@ function addTileDetermination(pieceSelected, pieceFound, pieceFoundId, possibleM
 }
 
 function showPossibleMoves(possibleMoves){
-  for(let i = 0;i < possibleMoves.length;i++){
+  getElement(possibleMoves[0]).classList.add("selected");
+  for(let i = 1;i < possibleMoves.length;i++){
     getElement(possibleMoves[i]).classList.add("possible");
   }
 }
 
 function hidePossibleMoves(possibleMoves){
-  for(let i = 0;i < possibleMoves.length;i++){
+  getElement(possibleMoves[0]).classList.remove("selected");
+  for(let i = 1;i < possibleMoves.length;i++){
     getElement(possibleMoves[i]).classList.remove("possible");
   }
 }
@@ -439,9 +441,8 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
 
       if (chessPiece != null) {
         // Final check for ensuring players can only select their own pieces.
-        let colorCheck = (playerMessage.innerHTML.includes("1") ? "white" : "black")
+        let colorCheck = (playerMessage.innerHTML.includes("1") ? "white" : "black");
         //if(getPieceColor(chessPiece.src) == getPieceColor(colorCheck)){
-          starting.classList.add("selected");
           result = tileId;
 
           // method that gets possible moves & method that shows possible moves is called here.
@@ -525,7 +526,6 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
 
       // regardless of what happens, the current tile is deselected and the possible moves are removed
       hidePossibleMoves(possibleMoves);
-      starting.classList.remove("selected");
       
       phase = (pawnPromotionCheck ? 3 : 1); // phase 1 = selecting what piece to move (case 1), phase 3 = pawn promotion
       if(phase == 3){
