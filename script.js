@@ -19,7 +19,7 @@ function checkArray(value, array) {
 }
 
 function tileIsEmpty(tileId){
-  let tile = document.getElementById(tileId);
+  let tile = getElement(tileId);
   img = tile.querySelector("img");
   return img == null;
 }
@@ -44,13 +44,13 @@ function addTileDetermination(pieceSelected, pieceFound, pieceFoundId, possibleM
 
 function showPossibleMoves(possibleMoves){
   for(let i = 0;i < possibleMoves.length;i++){
-    document.getElementById(possibleMoves[i]).classList.add("possible");
+    getElement(possibleMoves[i]).classList.add("possible");
   }
 }
 
 function hidePossibleMoves(possibleMoves){
   for(let i = 0;i < possibleMoves.length;i++){
-    document.getElementById(possibleMoves[i]).classList.remove("possible");
+    getElement(possibleMoves[i]).classList.remove("possible");
   }
 }
 
@@ -96,19 +96,19 @@ function makeBoard() {
       // If-statement chain below here are JUST FOR TESTING THE PIECES AND MAKING SURE THEY WORK AS INTENDED. The if-statement chain will be removed once the pieces are thoroughly tested.
       // This also means removing the image = ""; right below, since that is used to override the board putting the pieces in the right places at the beginning of the game.
       image = "";
-      if (position == "c7") {
+      if (position == "a8") {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_rook.svg"></div>`;
-      } else if (position == "b2") {
+      } else if (position == "e2") {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_pawn.svg"></div>`;
-      } else if (position == "a7") {
+      } else if (position == "d7") {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_pawn.svg"></div>`;
-      } else if(position == "f2"){
+      } else if(position == "e1"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_king.svg"></div>`;
-      } else if(position == "c2"){
+      } else if(position == "a1"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_bishop.svg"></div>`;
-      } else if(position == "e2"){
+      } else if(position == "c1"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_queen.svg"></div>`;
-      } else if(position == "e4"){
+      } else if(position == "a3"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_knight.svg"></div>`;
       } else {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
@@ -144,7 +144,7 @@ function verticalMovement(startPosition, loopStop, accumulatorValue, piece) {
   while (count != loopStop) {
     // if there is an img in the tile we are checking as a potential move, there is a piece there & the loop ends prematurely.
     id = letter + count;
-    tile = document.getElementById(id);
+    tile = getElement(id);
     if(tileIsEmpty(id) == false){
       img = tile.querySelector("img").src;
       break;
@@ -183,7 +183,7 @@ function horizontalMovement(startPosition, loopStop, accumulatorValue, piece){
 
     // if there is an img in the tile we are checking as a potential move, there is a piece there & the loop ends prematurely.
     id = letters[count] + number;
-    tile = document.getElementById(id);
+    tile = getElement(id);
     if(tileIsEmpty(id) == false){
       img = tile.querySelector("img").src;
       break;
@@ -220,7 +220,7 @@ function diagonalMovement(startPosition, loopStopLetter, loopStopNumber, accumul
   // important to note that since working with letters and numbers means we have different loop stopping values, we need to check both to prevent errors.
   while (letterAccumulator != loopStopLetter && numberAccumulator != loopStopNumber) {
     id = letters[letterAccumulator] + numberAccumulator;
-    tile = document.getElementById(id);
+    tile = getElement(id);
 
     // if there is an img in the tile we are checking as a potential move, there is a piece there & the loop ends prematurely.
     if(tileIsEmpty(id) == false){
@@ -275,11 +275,11 @@ function getPossibleMoves(starting, piece) {
             if(newNumber <= 8 && newNumber > 0){ // Board is from 1-8, so only numbers 1-8 are valid
               newCoord = newLetter + newNumber;
               // The following code determines if a target tile has a piece, and whether or not that piece is an enemy
-              if(document.getElementById(newCoord).querySelector("img") == null){
+              if(getElement(newCoord).querySelector("img") == null){
                 possibleMoves.push(newCoord);
               }else{
-                foundPiece = document.getElementById(newCoord).querySelector("img");
-                currentPiece = document.getElementById(starting).querySelector("img");
+                foundPiece = getElement(newCoord).querySelector("img");
+                currentPiece = getElement(starting).querySelector("img");
                 if(getPieceColor(currentPiece.src) != getPieceColor(foundPiece.src)){
                   possibleMoves.push(newCoord);
                 }
@@ -318,7 +318,7 @@ function getPossibleMoves(starting, piece) {
         // checks if new position is within bounds of chess board.
         if (newLetter >= 0 && newLetter < 8 && newNumber >= 1 && newNumber <= 8) {
           let newSquare = letters[newLetter] + newNumber;
-          let tile = document.getElementById(newSquare);
+          let tile = getElement(newSquare);
           let img = tile.querySelector("img");
 
           // checks if tile already has a piece on it. If yes, remove that label from possible moves.
@@ -353,7 +353,7 @@ function getPossibleMoves(starting, piece) {
 
       // if pawn is not in starting row, it can only move 1 space forward.
       let id = letter + (number + 1 * direction);
-      let tile = document.getElementById(id);
+      let tile = getElement(id);
       if(tileIsEmpty(id)){
         possibleMoves.push(id);
       }
@@ -362,7 +362,7 @@ function getPossibleMoves(starting, piece) {
       if (number == startingRow && tileIsEmpty(id)) {
         // 2 spaces forward in opposite direction based on pawn color.
         id = letter + (number + 2 * direction);
-        tile = document.getElementById(id);
+        tile = getElement(id);
         if(tileIsEmpty(id)){
           possibleMoves.push(id);
         }
@@ -379,13 +379,30 @@ function getPossibleMoves(starting, piece) {
         if(checks[i]){
           id = letters[letters.indexOf(letter)+factor] + (number + 1 * direction);
           if(tileIsEmpty(id) == false){ // Checks if there is a piece on the tiles diagonal to the pawn
-            let currentTile = document.getElementById(starting);
+            let currentTile = getElement(starting);
             let currentPiece = currentTile.querySelector("img");
-            tile = document.getElementById(id);
+            tile = getElement(id);
             let targetPiece = tile.querySelector("img");
             if(getPieceColor(targetPiece.src) != getPieceColor(currentPiece.src)){ // Checks if a piece on a diagonal tile is an enemy piece, in which case diagonal movement is possible
               possibleMoves.push(id);
             }
+          }
+        }
+      }
+
+      // Checks if en passant is an option
+      leftCheck = letters.indexOf(letter)+1 < letters.length;
+      rightCheck = letters.indexOf(letter)-1 > -1;
+      checks = [leftCheck,rightCheck];
+      let enPassantId, enPassantTile;
+      for(let i = 0; i < checks.length;i++){
+        factor = (i == 0 ? 1 : -1);
+        if(checks[i]){
+          enPassantId = letters[letters.indexOf(letter)+factor] + number;
+          enPassantTile = getElement(enPassantId);
+          if(enPassantTile.dataset.enpassant != undefined){
+            id = letters[letters.indexOf(letter)+factor] + (number + direction);
+            possibleMoves.push(id);
           }
         }
       }
@@ -405,7 +422,7 @@ let startingTile;
 function move(p, st) { // p = phase of movement method, st = starting tile.
   let tileId = getElement("tile").value;
   let result, starting, chessPiece;
-  let playerMessage = document.getElementById("playerTurn");
+  let playerMessage = getElement("playerTurn");
   let player = (playerMessage.innerHTML.includes("1") ? 1 : 2);
   let possibleMoves;
   switch (p) {
@@ -416,7 +433,7 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         break;
       }
 
-      // Tiles with img elements have pieces, so if chessPiece is not null, the move operation proceeds.
+      // Tiles with img elements have pieces, so if chessPiece is not null, the selection phase of the move operation proceeds.
       starting = getElement(tileId);
       chessPiece = starting.querySelector("img"); // gets img element of tile and uses that as the piece.
 
@@ -432,6 +449,20 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
           showPossibleMoves(possibleMoves);
 
           phase = 2; // phase 2 = selecting where to move that piece and moves it there (case 2)
+
+          let enPassantId, enPassantAttribute, skippedId;
+          for(let i = 4; i <= 5;i++){
+            for(let j = 0; j < letters.length;j++){
+              enPassantId = letters[j] + i;
+              enPassantAttribute = getElement(enPassantId).dataset.enpassant;
+              if(enPassantAttribute == player){
+                delete getElement(enPassantId).dataset.enpassant;
+                let colorFactor = (player == 1 ? -1 : 1);
+                skippedId = enPassantId[0] + (parseInt(enPassantId[1]) + colorFactor);
+                delete getElement(skippedId).dataset.skipped;
+              }
+            }
+          }
 
           // Updating player message with tile & piece selected
           let substringFirstNumber = chessPiece.src.indexOf("_") + 1;
@@ -451,12 +482,13 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
       possibleMoves = getPossibleMoves(starting.id, chessPiece.src);
       let targetTile = "";
 
+      // checks if the user entered a tile that the piece can actually move to; if not, restart movement phase
       if (checkArray(tileId, possibleMoves) == false) {
         result = st;
         break;
       }
 
-      // checks if the starting tile is different from the target tile. If different, that means the user is trying to move a piece to a new tile, in which case the movement method completes. If the two tiles are the same, then you are trying to move a piece to the tile it is already on, in which case the piece is deselected. The user does not lose a turn.
+      // checks if the starting tile is different from the target tile. If different, that means the user is trying to move a piece to a new tile, in which case the movement method proceeds with actual movement. If the two tiles are the same, then you are trying to move a piece to the tile it is already on, in which case the piece is deselected. The user does not lose a turn.
       if (tileId != st) {
         targetTile = getElement(tileId);
 
@@ -467,7 +499,24 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         starting.removeChild(chessPiece);
         targetTile.appendChild(chessPiece);
 
-        player = (playerMessage.innerHTML.includes("1") ? 2 : 1); // If the move actually moves a piece, then the player who will move next is not the player currently moving
+        // Checks if a pawn has been moved 2 tiles from its starting position; if so, that is the first time, and en passant is an option for the next player.
+        if(chessPiece.src.includes("pawn")){
+          let numOfStarting = parseInt(st[1]);
+          let numOfTarget = parseInt(tileId[1]);
+          let colorFactor = (player == 1 ? 1 : -1);
+          if(Math.abs(numOfStarting - numOfTarget) > 1){
+            targetTile.dataset.enpassant = player;
+            let skippedTileId = st[0] + (numOfStarting + colorFactor);
+            getElement(skippedTileId).dataset.skipped = true;
+          }else if(targetTile.dataset.skipped != undefined){
+            let enPassantId = tileId[0] + numOfStarting;
+            let enPassantTile = getElement(enPassantId);
+            enPassantTile.removeChild(enPassantTile.children[1])
+          }
+        }
+
+        // Gets the next player who moves; if the move actually moves a piece, then the player who will move next is not the player currently moving
+        player = (playerMessage.innerHTML.includes("1") ? 2 : 1);
 
         // Logic to determine if pawn promotion is an option
         pawnPromotionCheck = chessPiece.src.includes("pawn") && (targetTile.innerHTML.includes("1") || targetTile.innerHTML.includes("8"));
