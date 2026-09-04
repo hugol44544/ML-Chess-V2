@@ -98,6 +98,7 @@ function makeBoard() {
       // If-statement chain below here are JUST FOR TESTING THE PIECES AND MAKING SURE THEY WORK AS INTENDED. The if-statement chain will be removed once the pieces are thoroughly tested.
       // This also means removing the image = ""; right below, since that is used to override the board putting the pieces in the right places at the beginning of the game.
       image = "";
+      /*
       if (position == "a8") {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_rook.svg"></div>`;
       } else if (position == "e2") {
@@ -114,6 +115,25 @@ function makeBoard() {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_knight.svg"></div>`;
       } else {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
+      }*/
+      if (position == "a1"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_rook.svg"></div>`;
+      }else if(position == "h1"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_rook.svg"></div>`;
+      }else if (position == "e1"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_king.svg"></div>`;
+      }else if (position == "a8"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_rook.svg"></div>`;
+      }else if(position == "h8"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_rook.svg"></div>`;
+      }else if (position == "e8"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_king.svg"></div>`;
+      }else if(position == "c1"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_knight.svg"></div>`;
+      }else if(position == "f1"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_knight.svg"></div>`;
+      }else{
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
       }
 
       // resets colornum, so new tiles can have their color be determined.
@@ -123,8 +143,20 @@ function makeBoard() {
     }
     // ends the row (and board).
     build += `</div>`;
+
   }
   board.innerHTML = build;
+
+  // Upon initializing the board, tiles that contain kings & rooks have "castle" data associated with them. This enables castling; if the data is there, then that piece can be used in castling.
+  let tileId, castleTile;
+  let castleLetters = ["a","e","h"];
+  for(let i = 1;i < 9;i+=7){
+    for(let j = 0;j < castleLetters.length;j++){
+      tileId = castleLetters[j] + i;
+      castleTile = getElement(tileId);
+      castleTile.dataset.castle = 1;
+    }
+  }
 }
 
 // method that gets all the tiles vertically from a starting point. Only does so in one direction (up or down)
@@ -242,6 +274,48 @@ function diagonalMovement(startPosition, loopStopLetter, loopStopNumber, accumul
   return addTileDetermination(piece, img, id, possibleMoves)
 }
 
+// Function that gets tiles a king can castle to. Used exclusively by getPossibleMoves' king case.
+// kingTileId contains the 2 character id the king is currently located at
+// kingNumber is a 1 digit integer value that provides the row the king is.
+// Note that the vast majority of this function's logic is dependent on the king not having moved. Because of this, the king will always be at an "e" tile, which is where the "e" magic value comes from.
+// Similar idea for the magic values "a" and "h". On those lettered tiles exist rooks at the start of the game, so if they have not moved, they are on a or h tiles.
+function getCastle(kingTileId, kingNumber){
+  let castleTiles = [];
+  if(getElement(kingTileId).dataset.castle == 1){
+    // "checks" array holds values that are dependent on if there are any pieces between a king and a rook if the king is at its starting position. Index 0 is for the left of the king, index 1 is for the right of the king.
+    // Nested loop looks to the left and right of a king from the king's starting position to see if the tiles between the king and the rooks on its same team are empty. If not, depending on which direction is being looked at, the corresponding checks array index is updated (explained in previous comment)
+    let checks = [true, true], imgFound, currentId, currentTile;
+    let currentIndex, factor;
+    for(let i = 0;i < 2;i++){
+      imgFound = null;
+      factor = (i == 0 ? 1 : -1);
+      currentIndex = letters.indexOf("e") + factor
+      while(letters[currentIndex] != "a" && letters[currentIndex] != "h" && imgFound == null){
+        currentId = letters[currentIndex] + kingNumber;
+        currentTile = getElement(currentId);
+        if(currentTile.querySelector("img") != null){
+          imgFound = currentTile.querySelector("img");
+          checks[i] = false
+        }
+        currentIndex += factor;
+      }
+    }
+
+    // If the tiles between a king and its rook are empty, AND if the rook hasn't moved (still has the data associated with castling), then the king can possibly move to its castling tile.
+    // Magic values a & h are explained in the final comment before the function definition
+    // magic values "c" and "g" come from the fact that whenever a king castles, it always moves 2 tiles from where it currently is. Where the king currently is, when castling, will always be an e tile, and 2 tiles away from an "e" tile if considering just letters (which we do for castling) means a king can only move to a "c" or "g" tile, which is why those are magic values.
+    if(checks[0] && getElement("a"+kingNumber).dataset.castle == 1){
+      castleTiles.push("c"+kingNumber);
+    }
+    if(checks[1] && getElement("h"+kingNumber).dataset.castle == 1){
+      castleTiles.push("g"+kingNumber);
+    }
+  }
+  
+  return castleTiles;
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // method that gets all the possible moves. Highlights each, and returns an array of all the possible moves (including the selected tile).
@@ -329,6 +403,11 @@ function getPossibleMoves(starting, piece) {
           }
         }
       }
+
+      // gets the castling tiles a king can move to if castling is possible & makes them possible moves
+      let castleMoves = getCastle(starting, number);
+      possibleMoves = possibleMoves.concat(castleMoves);
+
       break;
     case "queen":
       // verticalMovement, horizontalMovement, and diagonalMovement functions only work in one direction at a time, so they are called multiple times. Magic numbers are explained in the function definitions.
@@ -393,6 +472,8 @@ function getPossibleMoves(starting, piece) {
       }
 
       // Checks if en passant is an option
+      // leftCheck & rightCheck are used again to determine if the adjacent tiles from a pawn exist
+      // the dataset enpassant attribute is associated with a tile that a pawn has just moved 2 tiles to from its starting position. This is added in phase 2 of the movement method, and after the next player's turn, the data is removed in move phase 1.
       leftCheck = letters.indexOf(letter)+1 < letters.length;
       rightCheck = letters.indexOf(letter)-1 > -1;
       checks = [leftCheck,rightCheck];
@@ -451,6 +532,7 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
 
           phase = 2; // phase 2 = selecting where to move that piece and moves it there (case 2)
 
+          // Goes through all tiles that could possibly support en passant special move. If the player data associated with the en passant tile is the same as the current player's number, that means the time frame for en passant is over and the data is removed from the en passant tile.
           let enPassantId, enPassantAttribute, skippedId;
           for(let i = 4; i <= 5;i++){
             for(let j = 0; j < letters.length;j++){
@@ -477,6 +559,7 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
     // actually moves the chess piece to its new tile; movement phase of move method.
     case 2:
       let pawnPromotionCheck = false;
+
       // get id of tile the user wants to move the selected piece to. If it is invalid, 2nd phase of move method fails & user must try again.
       starting = getElement(st);
       chessPiece = starting.querySelector("img"); // gets img element of tile and uses that as the piece.
@@ -490,6 +573,7 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
       }
 
       // checks if the starting tile is different from the target tile. If different, that means the user is trying to move a piece to a new tile, in which case the movement method proceeds with actual movement. If the two tiles are the same, then you are trying to move a piece to the tile it is already on, in which case the piece is deselected. The user does not lose a turn.
+      // THIS IS WHERE ACTUAL MOVEMENT LOGIC IS
       if (tileId != st) {
         targetTile = getElement(tileId);
 
@@ -500,20 +584,49 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         starting.removeChild(chessPiece);
         targetTile.appendChild(chessPiece);
 
-        // Checks if a pawn has been moved 2 tiles from its starting position; if so, that is the first time, and en passant is an option for the next player.
+        //Next 2 block blocks check for special moves en passant & king castling. For both, we need the starting tile's number.
+        let numOfStarting = parseInt(st[1]);
+
+        //Handles special moves en passant & castling
+        // Checks if a pawn has been moved 2 tiles from its starting position; if so, that is the first time, and en passant is an option for the next player. Data that is the current player's number is associated with the tile the pawn just landed on, making it an "en passant tile". Also adds "true" data to the skipped tile. Also handles when en passant is actually being done.
         if(chessPiece.src.includes("pawn")){
-          let numOfStarting = parseInt(st[1]);
           let numOfTarget = parseInt(tileId[1]);
           let colorFactor = (player == 1 ? 1 : -1);
-          if(Math.abs(numOfStarting - numOfTarget) > 1){
+          if(Math.abs(numOfStarting - numOfTarget) > 1){ // Prepares a tile for potentially facing en passant
             targetTile.dataset.enpassant = player;
             let skippedTileId = st[0] + (numOfStarting + colorFactor);
             getElement(skippedTileId).dataset.skipped = true;
-          }else if(targetTile.dataset.skipped != undefined){
+          }else if(targetTile.dataset.skipped != undefined){ // If the targetTile was skipped, then the actual en passant movement proceeds
             let enPassantId = tileId[0] + numOfStarting;
             let enPassantTile = getElement(enPassantId);
             enPassantTile.removeChild(enPassantTile.children[1])
           }
+        // Handles castling logic.
+        // If the piece is a king, then the king is being moved & thus castling is no longer an option, so the castle tag is removed from both king & rooks on a team
+        }else if(starting.dataset.castle == 1){
+          if(chessPiece.src.includes("king")){
+            delete starting.dataset.castle;
+            delete getElement("a"+numOfStarting).dataset.castle;
+            delete getElement("h"+numOfStarting).dataset.castle;
+            let letterDistance = Math.abs(letters.indexOf(st[0])-letters.indexOf(tileId[0]));
+            if(letterDistance > 1){ // If the king moves 2 tiles from its targeting tile, then it is castling and the castling logic proceeds
+              let color = getPieceColor(chessPiece.src);
+              let direction = (letters.indexOf(tileId[0]) > letters.indexOf(st[0]) ? -1 : 1);
+              let rookLetter = (direction == -1 ? "a" : "h");
+              let newRookTileId = letters[letters.indexOf(tileId[0])+direction] + numOfStarting;
+              let newRookTile = getElement(newRookTileId);
+              let newRookImg = document.createElement("img");
+              newRookImg.src = `chessPieces/${color}Pieces/${color.substring(0,1)}_rook.svg`;
+              newRookTile.appendChild(newRookImg);
+              let currentRookTile = getElement(rookLetter + numOfStarting);
+              currentRookTile.removeChild(currentRookTile.children[1]);
+            }
+          }else{ // Only other pieces with castle data are rooks, so if one moves, it can no longer castle with the king. However, king can still castle with other rook if the other rook has not castled.
+            delete starting.dataset.castle;
+          }
+        } // Regardless of castling or not, any piece that moves to a tile with castle data associated with it captures the rook on that tile, and thus castling for that tile is disabled.
+        if(targetTile.dataset.castle == 1){
+          delete targetTile.dataset.castle;
         }
 
         // Gets the next player who moves; if the move actually moves a piece, then the player who will move next is not the player currently moving
