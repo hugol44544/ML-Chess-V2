@@ -98,41 +98,17 @@ function makeBoard() {
       // If-statement chain below here are JUST FOR TESTING THE PIECES AND MAKING SURE THEY WORK AS INTENDED. The if-statement chain will be removed once the pieces are thoroughly tested.
       // This also means removing the image = ""; right below, since that is used to override the board putting the pieces in the right places at the beginning of the game.
       image = "";
-      /*
-      if (position == "a8") {
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_rook.svg"></div>`;
-      } else if (position == "e2") {
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_pawn.svg"></div>`;
-      } else if (position == "d7") {
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_pawn.svg"></div>`;
+      if (position == "g1") {
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_bishop.svg"></div>`;
       } else if(position == "e1"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_king.svg"></div>`;
-      } else if(position == "a1"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_bishop.svg"></div>`;
-      } else if(position == "c1"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_queen.svg"></div>`;
-      } else if(position == "a3"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_knight.svg"></div>`;
-      } else {
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
-      }*/
-      if (position == "a1"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_rook.svg"></div>`;
-      }else if(position == "h1"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_rook.svg"></div>`;
-      }else if (position == "e1"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_king.svg"></div>`;
-      }else if (position == "a8"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_rook.svg"></div>`;
-      }else if(position == "h8"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_rook.svg"></div>`;
-      }else if (position == "e8"){
+      } else if(position == "e8"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_king.svg"></div>`;
-      }else if(position == "c1"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_knight.svg"></div>`;
-      }else if(position == "f1"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_knight.svg"></div>`;
-      }else{
+      } else if(position == "f5"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_queen.svg"></div>`;
+      } else if(position == "h8"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_queen.svg"></div>`;
+      } else {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
       }
 
@@ -316,6 +292,226 @@ function getCastle(kingTileId, kingNumber){
 
 }
 
+// checks if pawn diagonal movement is possible
+function getPawnDiagonals(pawnId, pawnLetter, pawnNumber, direction){
+  // left & right checks are for ensuring the letters array is not indexed out of range; prevents errors
+  let leftCheck = letters.indexOf(pawnLetter)+1 < letters.length;
+  let rightCheck = letters.indexOf(pawnLetter)-1 > -1;
+  let checks = [leftCheck,rightCheck];
+  let factor = 0; // Factor determines the direction (up or down) we are looking at from the pawn (due to the pawns' different senses of "forward" depending on its color)
+  let id, tile;
+  let diagonalMoves = [];
+  for(let i = 0;i < checks.length;i++){
+    factor = (i == 0 ? 1 : -1);
+    if(checks[i]){
+      id = letters[letters.indexOf(pawnLetter)+factor] + (pawnNumber + 1 * direction);
+      if(tileIsEmpty(id) == false){ // Checks if there is a piece on the tiles diagonal to the pawn
+        let currentTile = getElement(pawnId);
+        let currentPiece = currentTile.querySelector("img");
+        tile = getElement(id);
+        let targetPiece = tile.querySelector("img");
+        if(getPieceColor(targetPiece.src) != getPieceColor(currentPiece.src)){ // Checks if a piece on a diagonal tile is an enemy piece, in which case diagonal movement is possible
+          diagonalMoves.push(id);
+        }
+      }
+    }
+  }
+  return diagonalMoves;
+}
+
+// Gets all the enemy moves; player parameter is either 1 or 2
+// Mainly used to determine all the tiles a king cannot move to (for check & checkmate)
+function getAllEnemyMoves(player){
+  let color = (player == 1 ? "white" : "black");
+  let currentElement, currentPiece;
+  let allMoves = [], enemyMoves = [];
+
+  // We go through the entire board to search for all pieces; if we come across a piece, and it's the color of the player we're looking at, then we get its possible moves.
+  // Since this function is used by king for check & checkmate, we only check a pawn's diagonal moves, since a pawn moving forward & en passant does not affect check or checkmate; if we included forward movement, a king would be unable to move in front of an enemy pawn.
+  for(let i = 0;i < list.length;i++){
+    enemyMoves = [];
+    if(tileIsEmpty(list[i]) == false){
+      currentElement = getElement(list[i]);
+      currentPiece = currentElement.querySelector("img").src;
+      if(currentPiece.includes(color) == false){
+        if(currentPiece.includes("pawn")){
+          let pawnLetter = list[i].substring(0,1), pawnNumber = parseInt(list[i].substring(1,2)), direction = (color == "white" ? -1 : 1);
+          // left & right checks are for ensuring the letters array is not indexed out of range; prevents errors
+          let leftCheck = letters.indexOf(pawnLetter)+1 < letters.length, rightCheck = letters.indexOf(pawnLetter)-1 > -1;
+          let checks = [leftCheck,rightCheck];
+          let factor = 0; // Factor determines the direction (up or down) we are looking at from the pawn (due to the pawns' different senses of "forward" depending on its color)
+          let id;
+          for(let i = 0;i < checks.length;i++){
+            factor = (i == 0 ? 1 : -1);
+            if(checks[i]){
+              id = letters[letters.indexOf(pawnLetter)+factor] + (pawnNumber + 1 * direction);
+              enemyMoves.push(id);
+            }
+          }
+        }else{ // If the piece is not a pawn, we just get all possible moves regularly
+          enemyMoves = getPossibleMoves(list[i],currentPiece);
+          enemyMoves.shift();
+        }
+        // We push a JSON including all relevant information, which can be used later
+        allMoves.push({"piece":currentPiece,"tile":list[i],"moves":enemyMoves});
+      }
+    }
+  }
+  return allMoves;
+}
+
+// Compares a king's moves to all enemy pieces' moves. Prevents a king from moving to a tile where an enemy piece can move to, since the king would be in check.
+// playerNumber is either 1 or 2, and possibleMoves is the selected king's possible moves
+function checkKingMoves(playerNumber, possibleMoves){
+  let allEnemyMoves = getAllEnemyMoves(playerNumber);
+  let currentEnemy, currentEnemyMoves;
+  let tilesToRemove = [];
+  for(let i = 1; i < possibleMoves.length;i++){
+    for(let j = 0; j < allEnemyMoves.length;j++){
+      currentEnemy = allEnemyMoves[j];
+      currentEnemyMoves = currentEnemy["moves"];
+      if(currentEnemyMoves.includes(possibleMoves[i])){
+        tilesToRemove.push(possibleMoves[i]);
+      }
+    }
+  }
+  let newPossibleMoves = [];
+  for(let i = 0; i < possibleMoves.length;i++){
+    if(tilesToRemove.includes(possibleMoves[i]) == false){
+      newPossibleMoves.push(possibleMoves[i]);
+    }
+  }
+  return newPossibleMoves;
+}
+
+// Restricts allied piece movement if an ally's potential move puts its king in check or can help the king if the king is already in check. Does this by updating the board with all possible movements by the selected piece and simulating the board afterwards, determining if the king is safe, and then returning the board to normal once all possible moves are considered.
+// Used in phase 1 & 2 of the movement method on a selected piece
+// possibleMoves is the selected piece's possible moves
+// pieceId is the ID of the tile the selected piece is on
+// player is the current player that is moving
+// kingId is the ID of the tile the allied king is currently on
+// kingIsPiece is a flag that grants the function a bit of a double usage; the only change is that we check if a move by a selected king will actually get the king out of check
+function simulateMovesThatKeepKingSafe(possibleMoves, pieceId, player, kingId, kingIsPiece){
+
+  // Prepare the board for simulation
+  let originalTile = getElement(pieceId);
+  let originalPieceImg = originalTile.querySelector("img");
+  originalTile.removeChild(originalTile.children[1]);
+
+  let newPossibleMoves = [possibleMoves[0]]; // Regardless, we can always deselect our current piece
+  let enemyPieces, targetTile, targetTileImg, hasImage = false, tileCheck = true;
+
+  for(let i = 1;i < possibleMoves.length;i++){
+    // If the tile we encounter has an enemy piece on it, then we simulate taking that piece too; piece found is returned to its original spot at the end of each iteration to provide the original board for the next simulation of a move
+    hasImage = false;
+    targetTile = getElement(possibleMoves[i]);
+    if(targetTile.querySelector("img") != null){
+      targetTileImg = targetTile.querySelector("img");
+      if(getPieceColor(targetTileImg.src) != getPieceColor(originalPieceImg.src)){
+        hasImage = true;
+        targetTile.removeChild(targetTile.children[1]);
+      }
+    }
+    targetTile.appendChild(originalPieceImg);
+
+    // We get all the enemy moves, and see if our new, simulated move puts the king in check; if so, then the move we are currently simulating cannot be done
+    enemyPieces = getAllEnemyMoves(player);
+    tileCheck = true;
+    for(let j = 0;j < enemyPieces.length;j++){
+      if(kingIsPiece){ // Flagged case explained in the function definition; if the selected piece is the king, then we look to see if a king's move will take him out of check
+        if(enemyPieces[j]["moves"].includes(possibleMoves[i])){
+          tileCheck = false;
+        }
+      }else{
+        if(enemyPieces[j]["moves"].includes(kingId)){
+          tileCheck = false;
+        }
+      }
+    }
+
+    // If the move does not put the king in check, then it's ok to move there
+    if(tileCheck){
+      newPossibleMoves.push(possibleMoves[i]);
+    }
+
+    // Reverse the simulation to prepare for next iteration
+    targetTile.removeChild(targetTile.children[1]);
+    if(hasImage){
+      targetTile.appendChild(targetTileImg);
+    }
+  }
+
+  // fully restore the board to its state before the function was called (before the simulation began)
+  originalTile.appendChild(originalPieceImg);
+  return newPossibleMoves;
+}
+
+// Gets the element associated with all tiles that have an image; used in determineInsufficientPieces() function
+function getAllPieceTiles(){
+  let whitePieces = [], blackPieces = [];
+  let currentElement, currentElementImg, imageSource;
+  for(let i = 0; i < list.length;i++){
+    currentElement = getElement(list[i]); // once again using global list[] that's defined upon board creation (contains all tiles)
+    currentElementImg = currentElement.querySelector("img");
+    if(currentElementImg != null){
+      imageSource = currentElementImg.src;
+      if(getPieceColor(imageSource) == "white"){
+        whitePieces.push(currentElement);
+      }else{
+        blackPieces.push(currentElement);
+      }
+    }
+  }
+  let allPieces = [whitePieces,blackPieces];
+  return allPieces;
+}
+
+// Used for determining if a draw occurs due to insufficient pieces
+// allTiles parameter is all the tiles that have pieces
+function determineInsufficientPieces(allTiles){
+  // All arrays follow the pattern that index 0 is associated with white pieces & index 1 is associated with black pieces
+  // soloKing is used to store if a player only has a king in their pieces
+  // badCombo refers to the case where a player has a king and either a bishop or knight
+  // hasBishop refers to if a player has a bishop
+  // tileColors refers to the condition that both players have kings and 1 bishop each, but the bishops are on the same colored tile, which cannot produce a checkmate and thus produces a draw
+  let soloKing = [false, false];
+  let badCombo = [false, false];
+  let hasBishop = [false, false];
+  let tileColors = [];
+  for(let i = 0;i < allTiles.length;i++){
+    let team = allTiles[i]; // allTiles[i] give sus either the whitePieces[] array or blackPieces[] array from getAllPieceTiles depending on the index value
+    if(team.length == 1){ // If the player only has a king, we can just skip everything else
+      soloKing[i] = true;
+    }else if(team.length == 2){ // If a player has 2 pieces, we only care if those pieces are a knight or bishop, and if it's a bishop, we care what color tile it's on, which we get form the classList
+      //Remember that team is a list of elements, specifically the tiles on the board
+      for(let j = 0; j < team.length;j++){
+        currentImg = team[j].querySelector("img");
+        if(currentImg.src.includes("bishop")){
+          badCombo[i] = true;
+          hasBishop[i] = true;
+          tileColors.push(team[j].classList[0]);
+        }else if(currentImg.src.includes("knight")){
+          badCombo[i] = true;
+        }
+      }
+    }
+  }
+
+  // bishops are involved in 2 different ways to draw by insufficient pieces, so we need to do a bit more lengthy logic
+  let insufficientByBishop = false;
+  if(tileColors.length == 2){
+    let tileColorsNumbers = [ tileColors[0].substring(tileColors[0].length-1) , tileColors[1].substring(tileColors[1].length-1)];
+    insufficientByBishop = hasBishop[0] && hasBishop[1] && tileColorsNumbers[0]%2 == tileColorsNumbers[1]%2;
+    // Recall that the tiles recieve their color depending on their number: 0, 1, or 2. 0 & 2 produce the same color tile, so we need math to determine if the colors are the same or not
+  }
+  let insufficientByKings = soloKing[0] && soloKing[1];
+  let insufficientByCombo = soloKing[0] && badCombo[1] || soloKing[1] && badCombo[0];
+
+  // Checks if any of the insufficient checks are true, because if even one is, then checkmate cannot be achieved and we have a draw.
+  let insufficientByAny = insufficientByBishop || insufficientByKings || insufficientByCombo;
+  return insufficientByAny;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // method that gets all the possible moves. Highlights each, and returns an array of all the possible moves (including the selected tile).
@@ -328,7 +524,6 @@ function getPossibleMoves(starting, piece) {
   let substringFirstNumber = piece.indexOf("_") + 1;
   let substringSecondNumber = piece.indexOf(".svg");
   let pieceName = piece.substring(substringFirstNumber, substringSecondNumber);
-
   // determines what piece is being moved and shows possible moves.
   switch (pieceName) {
     case "rook":
@@ -434,7 +629,6 @@ function getPossibleMoves(starting, piece) {
 
       // if pawn is not in starting row, it can only move 1 space forward.
       let id = letter + (number + 1 * direction);
-      let tile = getElement(id);
       if(tileIsEmpty(id)){
         possibleMoves.push(id);
       }
@@ -443,33 +637,13 @@ function getPossibleMoves(starting, piece) {
       if (number == startingRow && tileIsEmpty(id)) {
         // 2 spaces forward in opposite direction based on pawn color.
         id = letter + (number + 2 * direction);
-        tile = getElement(id);
         if(tileIsEmpty(id)){
           possibleMoves.push(id);
         }
       }
 
       // checks if pawn can capture a piece diagonally.
-      // left & right checks are for ensuring the letters array is not indexed out of range; prevents errors
-      let leftCheck = letters.indexOf(letter)+1 < letters.length;
-      let rightCheck = letters.indexOf(letter)-1 > -1;
-      let checks = [leftCheck,rightCheck];
-      let factor = 0; // Factor determines the direction (up or down) we are looking at from the pawn (due to the pawns' different senses of "forward" depending on its color)
-      for(let i = 0;i < checks.length;i++){
-        factor = (i == 0 ? 1 : -1);
-        if(checks[i]){
-          id = letters[letters.indexOf(letter)+factor] + (number + 1 * direction);
-          if(tileIsEmpty(id) == false){ // Checks if there is a piece on the tiles diagonal to the pawn
-            let currentTile = getElement(starting);
-            let currentPiece = currentTile.querySelector("img");
-            tile = getElement(id);
-            let targetPiece = tile.querySelector("img");
-            if(getPieceColor(targetPiece.src) != getPieceColor(currentPiece.src)){ // Checks if a piece on a diagonal tile is an enemy piece, in which case diagonal movement is possible
-              possibleMoves.push(id);
-            }
-          }
-        }
-      }
+      possibleMoves = possibleMoves.concat(getPawnDiagonals(starting, letter, number, direction));
 
       // Checks if en passant is an option
       // leftCheck & rightCheck are used again to determine if the adjacent tiles from a pawn exist
@@ -477,7 +651,7 @@ function getPossibleMoves(starting, piece) {
       leftCheck = letters.indexOf(letter)+1 < letters.length;
       rightCheck = letters.indexOf(letter)-1 > -1;
       checks = [leftCheck,rightCheck];
-      let enPassantId, enPassantTile;
+      let enPassantId, enPassantTile, factor;
       for(let i = 0; i < checks.length;i++){
         factor = (i == 0 ? 1 : -1);
         if(checks[i]){
@@ -506,11 +680,35 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
   let tileId = getElement("tile").value;
   let result, starting, chessPiece;
   let playerMessage = getElement("playerTurn");
-  let player = (playerMessage.innerHTML.includes("1") ? 1 : 2);
+  let player = (playerMessage.innerHTML.includes("Player 1") ? 1 : 2);
   let possibleMoves;
+  let kingColor = (player == 1 ? "white" : "black");
+  let kingId = document.querySelector(`img[src="chessPieces/${kingColor}Pieces/${kingColor[0]}_king.svg"]`).parentElement.id;
   switch (p) {
     // selection phase of movement method (phase 1); user selects a tile to move a piece from.
     case 1:
+      // Checks if user initiates a draw request. If so, next player can either accept or decline. If decline, game ends in a draw; if accept, game resumes with the player that initiated the draw's turn
+      if(playerMessage.dataset.draw != undefined){
+        if(tileId.toLowerCase() == "accept"){
+          playerMessage.innerHTML = `Draw - Induced by players`;
+          phase = 4;
+        }else if(tileId.toLowerCase() == "decline"){
+          playerMessage.innerHTML = `Player ${playerMessage.dataset.draw}: Select a tile with a piece`;
+          delete playerMessage.dataset.draw;
+        }else{
+          break
+        }
+        break;
+      }else{
+        if(tileId.toLowerCase() == "draw"){
+          let nextPlayer = (player == 1 ? 2 : 1);
+          playerMessage.dataset.draw = player;
+          playerMessage.innerHTML = `Player ${player} is requesting a draw - Player ${nextPlayer}, either "accept" or "decline" the offer`;
+          break
+        }
+      }
+
+
       // get id of tile of piece user wants to move. If it is invalid, 1st phase of move method fails & user must try again.
       if (checkArray(tileId, list) == false) { // if tileId is not in list, then it is invalid.
         break;
@@ -526,8 +724,18 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         //if(getPieceColor(chessPiece.src) == getPieceColor(colorCheck)){
           result = tileId;
 
-          // method that gets possible moves & method that shows possible moves is called here.
+          // method that gets possible moves. Also used to determine where a king cannot move, and if the king is in check or checkmate.
           possibleMoves = getPossibleMoves(starting.id, chessPiece.src);
+          
+          // Ensures that a selected king cannot move to tiles that put him in check & ensures that all other pieces cannot move to tiles that put the king in check
+          if(chessPiece.src.includes("king")){
+            possibleMoves = checkKingMoves(player,possibleMoves);
+            possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, tileId, player, kingId, true);
+          }else{
+            possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, tileId, player, kingId, false);
+          }
+
+          // All possible moves light up
           showPossibleMoves(possibleMoves);
 
           phase = 2; // phase 2 = selecting where to move that piece and moves it there (case 2)
@@ -558,12 +766,18 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
 
     // actually moves the chess piece to its new tile; movement phase of move method.
     case 2:
-      let pawnPromotionCheck = false;
-
+      let pawnPromotionCheck = false, successfulMove = false;
       // get id of tile the user wants to move the selected piece to. If it is invalid, 2nd phase of move method fails & user must try again.
       starting = getElement(st);
       chessPiece = starting.querySelector("img"); // gets img element of tile and uses that as the piece.
       possibleMoves = getPossibleMoves(starting.id, chessPiece.src);
+      // Ensures that a selected king cannot move to tiles that put him in check & ensures that all other pieces cannot move to tiles that put the king in check
+      if(chessPiece.src.includes("king")){
+        possibleMoves = checkKingMoves(player,possibleMoves);
+        possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, st, player, kingId, true);
+      }else if(chessPiece != null){
+        possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, st, player, kingId, false);
+      }
       let targetTile = "";
 
       // checks if the user entered a tile that the piece can actually move to; if not, restart movement phase
@@ -584,7 +798,10 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         starting.removeChild(chessPiece);
         targetTile.appendChild(chessPiece);
 
-        //Next 2 block blocks check for special moves en passant & king castling. For both, we need the starting tile's number.
+        // Enables later logic
+        successfulMove = true;
+
+        //Next 2 code blocks check for special moves en passant & king castling. For both, we need the starting tile's number.
         let numOfStarting = parseInt(st[1]);
 
         //Handles special moves en passant & castling
@@ -629,8 +846,8 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
           delete targetTile.dataset.castle;
         }
 
-        // Gets the next player who moves; if the move actually moves a piece, then the player who will move next is not the player currently moving
-        player = (playerMessage.innerHTML.includes("1") ? 2 : 1);
+        // If movement is successful, then if any king was in check, it is no longer.
+        delete playerMessage.dataset.check;
 
         // Logic to determine if pawn promotion is an option
         pawnPromotionCheck = chessPiece.src.includes("pawn") && (targetTile.innerHTML.includes("1") || targetTile.innerHTML.includes("8"));
@@ -646,7 +863,69 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         let input = getElement("tile");
         input.placeholder = "enter piece";
       }
-      playerMessage.innerHTML = (phase == 3 ? `Player ${player}: Promote pawn at ${targetTile.innerHTML.substring(0,2)} to queen, bishop, knight, or rook` : `Player ${player}: Select a tile with a piece`); // Update player message to either phase 2 selection or phase 3 pawn promotion
+      // Need to determine which player it is, since if the current player moves, player needs to change; if current player deselected piece, it is still their turn.
+      let oppositePlayer = (player == 1 ? 2 : 1);
+      let nextPlayer = (successfulMove == true ? oppositePlayer : player);
+      playerMessage.innerHTML = (phase == 3 ? `Player ${nextPlayer}: Promote pawn at ${targetTile.innerHTML.substring(0,2)} to queen, bishop, knight, or rook` : `Player ${nextPlayer}: Select a tile with a piece`); // Update player message to either phase 2 selection or phase 3 pawn promotion
+
+      // Determines if the king of the next player is in check after the current player has finished moving
+      kingColor = (player == 1 ? "black" : "white");
+      kingId = document.querySelector(`img[src="chessPieces/${kingColor}Pieces/${kingColor[0]}_king.svg"]`).parentElement.id;
+      let enemyPieces = getAllEnemyMoves(nextPlayer);
+      let amount = 0; // reflects how many pieces put a king in check
+      for(let i = 0;i < enemyPieces.length;i++){
+        if(enemyPieces[i]["moves"].includes(kingId)){
+          playerMessage.dataset.check = true;
+          amount++;
+        }
+      }
+
+      // Updated message if the next player is in check
+      if(playerMessage.dataset.check){
+        playerMessage.innerHTML = `Player ${nextPlayer}: Check - Defend your king`;
+      }
+      
+      // If we're going to the next player, we need to determine if the current move just put the next player in checkmate.
+      if(player != nextPlayer){
+        allEmpty = true; // If a player has no current moves, that could spell for draw or checkmate
+        if(amount < 2){ // if less than 2 piece sput a king in check, then it is possible that an ally piece can get a king out of check with a single move. If not, then no single move from any allied piece can get a king out of check
+          // We need to determine the possible moves of the next player, so we get all the moves the next player can make. If the player can make moves (does not include deselection, aka moving a piece to the tile it is currently on), then we can avoid draw/checkmate by having no moves
+          let nextPlayerPieces = getAllEnemyMoves(player);
+          let currentId, currentImg;
+          for(let i = 0; i < nextPlayerPieces.length;i++){
+            possibleMoves = [];
+            currentId = nextPlayerPieces[i]["tile"];
+            currentImg = nextPlayerPieces[i]["piece"];
+            possibleMoves = getPossibleMoves(currentId, currentImg);
+            if(currentImg.includes("king")){
+              possibleMoves = checkKingMoves(nextPlayer,possibleMoves);
+              possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, currentId, nextPlayer, kingId, true);
+            }else if(chessPiece != null){
+              possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, currentId, nextPlayer, kingId, false);
+            }
+            possibleMoves.shift();
+            if(possibleMoves.length != 0){
+              allEmpty = false;
+            }
+          }
+        }
+
+        let isInsufficient = determineInsufficientPieces(getAllPieceTiles()); // determines if there are insufficient pieces by either side for a checkmate
+        // Handles logic for check & checkmate
+        if(allEmpty || isInsufficient){
+          if(playerMessage.dataset.check){
+            oppositePlayer = (player == 1 ? 2 : 1);
+            playerMessage.innerHTML = `Checkmate - Player ${player} wins`;
+          }else{
+            if(isInsufficient){
+              playerMessage.innerHTML = `Draw - Insufficient pieces for checkmate`;
+            }else{
+              playerMessage.innerHTML = `Draw - Player ${oppositePlayer} has no legal moves`;
+            }
+          }
+          phase = 4; // End phase; game over
+        }
+      }
       break;
     case 3:
       let pawnMessage = playerMessage.innerHTML;
@@ -664,6 +943,9 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         let input = getElement("tile");
         input.placeholder = "enter tile position";
       }
+    case 4:
+      // Game over phase.
+      break;
   }
 
   getElement("tile").value = ""; //Resets text box
