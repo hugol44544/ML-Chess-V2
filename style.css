@@ -282,7 +282,7 @@ footer {
 }
 
 /* Player turn */
-.playerTurn{
+.playerMessage{
   border:3px solid #493628;
   color: white;
   font-size: 24px;
@@ -292,4 +292,17 @@ footer {
 #display{
   flex:1;
   text-align:center;
+}
+
+.reset {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+}
+
+.credits{
+  color:#493628;
+  size: 20px;
+  padding: 10px;
 }

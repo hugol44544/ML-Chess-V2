@@ -96,24 +96,6 @@ function makeBoard() {
 
       // "build" variable adds a new tile to the row currently being created.
       // determines color of tile, assigns it an id (its tile position), and makes its tile position visible, along with any image.
-
-      // If-statement chain below here are JUST FOR TESTING THE PIECES AND MAKING SURE THEY WORK AS INTENDED. The if-statement chain will be removed once the pieces are thoroughly tested.
-      // This also means removing the image = ""; right below, since that is used to override the board putting the pieces in the right places at the beginning of the game.
-      /*image = "";
-      if (position == "g1") {
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_bishop.svg"></div>`;
-      } else if(position == "e1"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_king.svg"></div>`;
-      } else if(position == "e8"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_king.svg"></div>`;
-      } else if(position == "f2"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_pawn.svg"></div>`;
-      } else if(position == "h8"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_queen.svg"></div>`;
-      } else {
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
-      }*/
-
       build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
 
       // resets colornum, so new tiles can have their color be determined.
@@ -141,6 +123,13 @@ function makeBoard() {
   // Update the input announcer to its initial state
   let positionAnnouncer = getElement("display");
   positionAnnouncer.innerHTML = "Input: <strong>None</strong>";
+
+  // Update the player message to its initial state
+  let playerMessage = getElement("playerMessage");
+  playerMessage.innerHTML = "White: Select a tile with a piece";
+
+  // move method phase resets to its selection phase
+  phase = 1;
 
 }
 
@@ -686,9 +675,9 @@ let startingTile;
 
 // function to move pieces. Called in the audio method.
 function move(p, st, input) { // p = phase of movement method, st = starting tile, input = audio input
-  let tileId = input;
+  let userInput = input;
   let result, starting, chessPiece, possibleMoves, nextPlayer;
-  let playerMessage = getElement("playerTurn");
+  let playerMessage = getElement("playerMessage");
   let player = (playerMessage.innerHTML.includes("White") ? "White" : "Black");
   let kingColor = player.toLowerCase();
   let kingId = document.querySelector(`img[src="chessPieces/${kingColor}Pieces/${kingColor[0]}_king.svg"]`).parentElement.id;
@@ -697,10 +686,10 @@ function move(p, st, input) { // p = phase of movement method, st = starting til
     case 1:
       // Checks if user initiates a draw request. If so, next player can either accept or decline. If decline, game ends in a draw; if accept, game resumes with the player that initiated the draw's turn
       if(playerMessage.dataset.draw != undefined){
-        if(tileId.toLowerCase() == "accept"){
+        if(userInput.toLowerCase() == "accept"){
           playerMessage.innerHTML = `Draw - Induced by players`;
           phase = 4;
-        }else if(tileId.toLowerCase() == "decline"){
+        }else if(userInput.toLowerCase() == "decline"){
           playerMessage.innerHTML = `${playerMessage.dataset.draw}: Select a tile with a piece`;
           delete playerMessage.dataset.draw;
         }else{
@@ -708,7 +697,7 @@ function move(p, st, input) { // p = phase of movement method, st = starting til
         }
         break;
       }else{
-        if(tileId.toLowerCase() == "draw"){
+        if(userInput.toLowerCase() == "draw"){
           nextPlayer = (player == "White" ? "Black" : "White");
           playerMessage.dataset.draw = player;
           playerMessage.innerHTML = `${player} is requesting a draw - ${nextPlayer}, either "accept" or "decline" the offer`;
@@ -716,19 +705,19 @@ function move(p, st, input) { // p = phase of movement method, st = starting til
         }
       }
 
-      if (checkArray(tileId, list) == false) { // if tileId is not in list, then it is invalid.
+      if (checkArray(userInput, list) == false) { // if userInput is not in list, then it is invalid.
         break;
       }
 
       // Tiles with img elements have pieces, so if chessPiece is not null, the selection phase of the move operation proceeds.
-      starting = getElement(tileId);
+      starting = getElement(userInput);
       chessPiece = starting.querySelector("img"); // gets img element of tile and uses that as the piece.
 
       if (chessPiece != null) {
         // Final check for ensuring players can only select their own pieces.
         let colorCheck = (playerMessage.innerHTML.includes("White") ? "white" : "black");
         if(getPieceColor(chessPiece.src) == getPieceColor(colorCheck)){
-          result = tileId;
+          result = userInput;
 
           // method that gets possible moves. Also used to determine where a king cannot move, and if the king is in check or checkmate.
           possibleMoves = getPossibleMoves(starting.id, chessPiece.src);
@@ -736,9 +725,9 @@ function move(p, st, input) { // p = phase of movement method, st = starting til
           // Ensures that a selected king cannot move to tiles that put him in check & ensures that all other pieces cannot move to tiles that put the king in check
           if(chessPiece.src.includes("king")){
             possibleMoves = checkKingMoves(player,possibleMoves);
-            possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, tileId, player, kingId, true);
+            possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, userInput, player, kingId, true);
           }else{
-            possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, tileId, player, kingId, false);
+            possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, userInput, player, kingId, false);
           }
 
           // All possible moves light up
@@ -765,7 +754,7 @@ function move(p, st, input) { // p = phase of movement method, st = starting til
           let substringFirstNumber = chessPiece.src.indexOf("_") + 1;
           let substringSecondNumber = chessPiece.src.indexOf(".svg");
           let pieceName = chessPiece.src.substring(substringFirstNumber, substringSecondNumber);
-          playerMessage.innerHTML = `${player}: Selected ${pieceName} ${tileId} - Select a tile to move it to`;
+          playerMessage.innerHTML = `${player}: Selected ${pieceName} ${userInput} - Select a tile to move it to`;
         }
       }
       break;
@@ -787,15 +776,15 @@ function move(p, st, input) { // p = phase of movement method, st = starting til
       let targetTile = "";
 
       // checks if the user entered a tile that the piece can actually move to; if not, restart movement phase; "deslect" & "D select" are the two most common options when saying "deslect" using the voice commands. 99% of the time it's deslect, with the other 1% being "D select", but since those are not "possible moves" per se, they are just added in the if-statement, since deselection by saying "deselect" is always an option
-      if (checkArray(tileId, possibleMoves) == false && tileId != "deselect" && tileId != "D select") {
+      if (checkArray(userInput, possibleMoves) == false && userInput != "deselect" && userInput != "D select") {
         result = st;
         break;
       }
 
       // checks if the starting tile is different from the target tile. If different, that means the user is trying to move a piece to a new tile, in which case the movement method proceeds with actual movement. If the two tiles are the same, then you are trying to move a piece to the tile it is already on, in which case the piece is deselected. The user does not lose a turn.
       // THIS IS WHERE ACTUAL MOVEMENT LOGIC IS
-      if (tileId != st && tileId != "deselect" && tileId != "D select") { // "deslect" & "D select" are the two most common options when saying "deslect" using the voice commands. 99% of the time it's deslect, with the other 1% being "D select", so that's accounted for here to aid in deselecting a piece (do not initiate any piece movement)
-        targetTile = getElement(tileId);
+      if (userInput != st && userInput != "deselect" && userInput != "D select") { // "deslect" & "D select" are the two most common options when saying "deslect" using the voice commands. 99% of the time it's deslect, with the other 1% being "D select", so that's accounted for here to aid in deselecting a piece (do not initiate any piece movement)
+        targetTile = getElement(userInput);
 
         // If there is a piece (img element) on the target tile, the user eliminates that piece by moving to the target tile.
         if(targetTile.querySelector("img") != null){
@@ -813,14 +802,14 @@ function move(p, st, input) { // p = phase of movement method, st = starting til
         //Handles special moves en passant & castling
         // Checks if a pawn has been moved 2 tiles from its starting position; if so, that is the first time, and en passant is an option for the next player. Data that is the current player's number is associated with the tile the pawn just landed on, making it an "en passant tile". Also adds "true" data to the skipped tile. Also handles when en passant is actually being done.
         if(chessPiece.src.includes("pawn")){
-          let numOfTarget = parseInt(tileId[1]);
+          let numOfTarget = parseInt(userInput[1]);
           let colorFactor = (player == "White" ? 1 : -1);
           if(Math.abs(numOfStarting - numOfTarget) > 1){ // Prepares a tile for potentially facing en passant
             targetTile.dataset.enpassant = player;
             let skippedTileId = st[0] + (numOfStarting + colorFactor);
             getElement(skippedTileId).dataset.skipped = true;
           }else if(targetTile.dataset.skipped != undefined){ // If the targetTile was skipped, then the actual en passant movement proceeds
-            let enPassantId = tileId[0] + numOfStarting;
+            let enPassantId = userInput[0] + numOfStarting;
             let enPassantTile = getElement(enPassantId);
             enPassantTile.removeChild(enPassantTile.children[1])
           }
@@ -831,12 +820,12 @@ function move(p, st, input) { // p = phase of movement method, st = starting til
             delete starting.dataset.castle;
             delete getElement("a"+numOfStarting).dataset.castle;
             delete getElement("h"+numOfStarting).dataset.castle;
-            let letterDistance = Math.abs(letters.indexOf(st[0])-letters.indexOf(tileId[0]));
+            let letterDistance = Math.abs(letters.indexOf(st[0])-letters.indexOf(userInput[0]));
             if(letterDistance > 1){ // If the king moves 2 tiles from its targeting tile, then it is castling and the castling logic proceeds
               let color = getPieceColor(chessPiece.src);
-              let direction = (letters.indexOf(tileId[0]) > letters.indexOf(st[0]) ? -1 : 1);
+              let direction = (letters.indexOf(userInput[0]) > letters.indexOf(st[0]) ? -1 : 1);
               let rookLetter = (direction == -1 ? "a" : "h");
-              let newRookTileId = letters[letters.indexOf(tileId[0])+direction] + numOfStarting;
+              let newRookTileId = letters[letters.indexOf(userInput[0])+direction] + numOfStarting;
               let newRookTile = getElement(newRookTileId);
               let newRookImg = document.createElement("img");
               newRookImg.src = `chessPieces/${color}Pieces/${color.substring(0,1)}_rook.svg`;
@@ -943,8 +932,8 @@ function move(p, st, input) { // p = phase of movement method, st = starting til
       chessPiece = starting.querySelector("img");
       let pawnColor = getPieceColor(chessPiece.src);
       let validPieces = ["queen","bishop","knight","rook"];
-      if(checkArray(tileId.toLowerCase(), validPieces)){
-        chessPiece.src = `chessPieces/${pawnColor}Pieces/${pawnColor[0]}_${tileId}.svg`;
+      if(checkArray(userInput.toLowerCase(), validPieces)){
+        chessPiece.src = `chessPieces/${pawnColor}Pieces/${pawnColor[0]}_${userInput}.svg`;
         playerMessage.innerHTML = `${nextPlayer}: Select a tile with a piece`;
         starting.classList.remove("selected");
         phase = 1;
@@ -1024,7 +1013,7 @@ let voiceMessage = ""; // Global voiceMessage stores the input value obtained wh
 // When toggled is false, that means the user has finished speaking and has locked in their choice, in which case the move method is called & that logic proceeds.
 function audio(toggled) {
   let positionAnnouncer = getElement("display");
-  let playerMessage = getElement("playerTurn");
+  let playerMessage = getElement("playerMessage");
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (typeof SpeechRecognition !== "undefined") {
     const recognition = new SpeechRecognition();
@@ -1072,14 +1061,14 @@ function audio(toggled) {
 }
 
 // When saying certain coordinates, the values are strange. This array of json has those strange values and their ideal values (what they should be).
-let specials = [{ "actual": ["1/8", "88", "A8", "h a", "ha", "aa", "a a", "AA", "AAA", "888", "a A8"], "ideal": "A8" },
-{ "actual": ["87"], "ideal": "A7" },
-{ "actual": ["Asics", "a sex", "a 6", "86"], "ideal": "A6" }, { "actual": ["see sex"], "ideal": "C6" }, { "actual": ["esox", "e-cigs", "e-cig"], "ideal": "E6" },
-{ "actual": ["define", "Define"], "ideal": "D5" },
-{ "actual": ["84"], "ideal": "A4" }, { "actual": ["before"], "ideal": "B4" },
+let specials = [{ "actual": ["1/8", "88", "A8", "aa", "a a", "AA", "AAA", "888", "a A8"], "ideal": "A8" },
+{ "actual": ["87"], "ideal": "A7" }, { "actual": ["CA","ca","c a"], "ideal": "C8" }, { "actual": ["d a", "da"], "ideal": "D8" }, { "actual": ["f a"], "ideal": "F8" }, { "actual": ["g a","ga"], "ideal": "G8" }, { "actual": ["a h8","h a","ha"], "ideal": "H8" },{ "actual": ["87"], "ideal": "A7" }, { "actual": ["V6"], "ideal": "B6" },
+{ "actual": ["Asics", "a sex", "a 6"], "ideal": "A6" }, { "actual": ["see sex"], "ideal": "C6" }, { "actual": ["esox", "e-cigs", "e-cig"], "ideal": "E6" },{ "actual": ["86"], "ideal": "H6" },
+{ "actual": ["define", "Define"], "ideal": "D5" },{ "actual": ["85","-85"], "ideal": "A5" },
+{ "actual": ["84"], "ideal": "A4" }, { "actual": ["before","before before"], "ideal": "B4" },
 { "actual": ["AO3", "83"], "ideal": "A3" },
-{ "actual": ["82"], "ideal": "A2" },
-{ "actual": ["do you want"], "ideal": "D1" }, { "actual": ["you won", "he won", "Ewan", "Yvonne"], "ideal": "E1" }, { "actual": ["bb8", "ba"], "ideal": "B8" },{"actual": ["EA","e 8","ea","E A"], "ideal":"E8"}];
+{ "actual": ["82","-82"], "ideal": "A2" },{ "actual": ["a one"], "ideal": "A1" },
+{ "actual": ["do you want"], "ideal": "D1" }, { "actual": ["you won", "he won", "Ewan", "Yvonne"], "ideal": "E1" }, { "actual": ["bb8", "ba", "b a", "V8"], "ideal": "B8" },{"actual": ["EA","e 8","ea","E A"], "ideal":"E8"}];
 
 // Same goes for saying piece names during pawn promotion. The audio detector picks up strange values, so those values are mapped to their ideal, proper values to be used by the program.
 let strangePieceNames = [{ "actual": ["Queen", "queen"], "ideal": "queen"}, { "actual": ["night"], "ideal": "knight" }, { "actual": ["Bishop"], "ideal": "bishop" }, { "actual": ["Brooke", "rough", "Run", "Ruck"], "ideal": "rook" }];
@@ -1095,7 +1084,7 @@ function convertStrangeTiles(voiceInput) {
     currentSpecial = specials[i];
     currentSpecialActuals = currentSpecial["actual"]; 
     for (let j = 0; j < currentSpecialActuals.length; j++) {
-      let currentActual = currentSpecialActuals[j];
+      let currentActual = currentSpecialActuals[j].replace(" ","");
       if (currentActual == voiceInput) {
         voiceInput = currentSpecial["ideal"];
       }
@@ -1113,7 +1102,7 @@ function convertStrangePieces(voiceInput) {
     currentSpecial = strangePieceNames[i];
     currentSpecialActuals = currentSpecial["actual"]; 
     for (let j = 0; j < currentSpecialActuals.length; j++) {
-      let currentActual = currentSpecialActuals[j];
+      let currentActual = currentSpecialActuals[j].replace(" ","");
       if (currentActual == voiceInput) {
         voiceInput = strangePieceNames[i]["ideal"];
       }

@@ -7,8 +7,8 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
   <!--tab name-->
-  <title>ML:Chess 2.0</title>
-  <link rel="icon" type="image/x-icon" href="https://s3.getstickerpack.com/storage/uploads/sticker-pack/genshin-klee/sticker_5.png?2ef2940dcf8dc40f0880359c4da13c4e&d=200x200">
+  <title>ML: Chess 2.0</title>
+  <link rel="icon" type="image/x-icon" href="chessPieces/whitePieces/w_pawn.svg">
 
   <link href="style.css" rel="stylesheet" type="text/css">
   <script src="script.js"></script>
@@ -18,7 +18,7 @@
 
   <!--header-->
   <div class="TitleName">
-    <h1>ML : Chess</h1>
+    <h2>ML: Chess 2.0</h2>
   </div>
 
   <!--navigation's 3 buttons-->
@@ -29,7 +29,7 @@
       <button type="button" id="info">Info</button>
       <div class="WebpageLinks">
         <a href="index.html">Home</a>
-        <a href="rules.html">Rules</a>
+        <a href="rules.html">Rules & Help</a>
         <a href="movement.html">Movement</a>
       </div>
     </div>
@@ -40,20 +40,22 @@
     
     <!-- BUTTON USED FOR TESTING BEFORE VOICE COMMANDS WERE IMPLEMENTED. Works using a text box for tile input.
     <button type="button" onclick="startingTile = move(phase, startingTile)" id="stop">Confirm</button>-->
-    <button type="button" onclick="makeBoard()">Reset</button>
 
   </div>
   
-  <div class = "directions playerTurn" id = "playerTurn">White: Select a tile with a piece</div>
-  <!--Audio Directions: White Box w/ Black Border
-    <input type = "text" placeholder = "enter tile position" id = "tile"> THIS LINE IS THE TEXT BOX USED FOR TESTING VIA MANUALLY ENTERING USING KEYBOARD-->
+  <div class = "directions playerMessage" id = "playerMessage"></div>
+    <!--<input type = "text" placeholder = "enter tile position" id = "tile"> THIS LINE IS THE TEXT BOX USED FOR TESTING VIA MANUALLY ENTERING USING KEYBOARD-->
     <p id="display"></p>
   </div>
 
   <!--Board-->
   <div class="board" id="board"></div>
-
-  <br>
+  <div class = "reset">
+    <button type="button" onclick="makeBoard()">Reset</button>
+  </div>
+  <br><br>
+  <a class = "credits" href="credits.html">Credits</a>
+  <br><br>
   
   <footer>
     footer: shoutout to Mia Lambert!!
