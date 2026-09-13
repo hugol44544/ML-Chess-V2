@@ -35,25 +35,20 @@
     </div>
 
     <!--Audio Buttons (not in a div): Start, Confirm, Reset-->
-    <!--<button type="button" onclick="audio(true)" id="start">Start</button>
-    <button type="button" onclick="audio(false)" id="stop">Confirm</button>-->
-    <button type="button" onclick="startingTile = move(phase, startingTile)" id="stop">Confirm</button>
+    <button type="button" onclick="audio(true)" id="start">Start</button>
+    <button type="button" onclick="audio(false)" id="stop">Confirm</button>
+    
+    <!-- BUTTON USED FOR TESTING BEFORE VOICE COMMANDS WERE IMPLEMENTED. Works using a text box for tile input.
+    <button type="button" onclick="startingTile = move(phase, startingTile)" id="stop">Confirm</button>-->
     <button type="button" onclick="makeBoard()">Reset</button>
+
   </div>
   
-  <div class = "directions playerTurn" id = "playerTurn">Player 1: Select a tile with a piece</div>
-  <!--Audio Directions: White Box w/ Black Border-->
-  <div class="directions">
-    <input type = "text" placeholder = "enter tile position" id = "tile">
-    <!--
-    <div id="directions" class="nocenter">
-      <strong>WHITE</strong> - Press <strong>START</strong> and state the position of the piece you want to move then
-      press <strong>STOP</strong>.
-    </div>
-    <p id="display">Selected Position: <strong>None</strong></p>-->
+  <div class = "directions playerTurn" id = "playerTurn">White: Select a tile with a piece</div>
+  <!--Audio Directions: White Box w/ Black Border
+    <input type = "text" placeholder = "enter tile position" id = "tile"> THIS LINE IS THE TEXT BOX USED FOR TESTING VIA MANUALLY ENTERING USING KEYBOARD-->
+    <p id="display"></p>
   </div>
-
-  <br>
 
   <!--Board-->
   <div class="board" id="board"></div>

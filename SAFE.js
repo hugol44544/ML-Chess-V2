@@ -1,3 +1,5 @@
+// SAFE.js has all of the original code from the 2022 version of this project that was made as a high school programming project. As things currently stand, the code here is incredibly outdated and harsh on the eyes, and some of the functionality isn't even here (like only moving pieces to possible moves, check, checkmate, & more), and some features that are here are unreliable (taking pieces throws an error). This file will be deleted before the next iteration of the project, which will also be this project's final iteration. But yeah, this file is just a bit of fun history.
+
 let pieces = ["p",
   "ah",
   "bg",

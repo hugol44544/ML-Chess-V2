@@ -42,6 +42,7 @@ function addTileDetermination(pieceSelected, pieceFound, pieceFoundId, possibleM
   return possibleMoves;
 }
 
+// Function that adds the highlighting of possible moves of a selected piece
 function showPossibleMoves(possibleMoves){
   getElement(possibleMoves[0]).classList.add("selected");
   for(let i = 1;i < possibleMoves.length;i++){
@@ -49,6 +50,7 @@ function showPossibleMoves(possibleMoves){
   }
 }
 
+// Function that removes the highlighting on the baord of the possible moves of a selected piece
 function hidePossibleMoves(possibleMoves){
   getElement(possibleMoves[0]).classList.remove("selected");
   for(let i = 1;i < possibleMoves.length;i++){
@@ -97,20 +99,22 @@ function makeBoard() {
 
       // If-statement chain below here are JUST FOR TESTING THE PIECES AND MAKING SURE THEY WORK AS INTENDED. The if-statement chain will be removed once the pieces are thoroughly tested.
       // This also means removing the image = ""; right below, since that is used to override the board putting the pieces in the right places at the beginning of the game.
-      image = "";
+      /*image = "";
       if (position == "g1") {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_bishop.svg"></div>`;
       } else if(position == "e1"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/whitePieces/w_king.svg"></div>`;
       } else if(position == "e8"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_king.svg"></div>`;
-      } else if(position == "f5"){
-        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_queen.svg"></div>`;
+      } else if(position == "f2"){
+        build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_pawn.svg"></div>`;
       } else if(position == "h8"){
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br><img src = "chessPieces/blackPieces/b_queen.svg"></div>`;
       } else {
         build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
-      }
+      }*/
+
+      build += `<div class = "color${colornum} square" id = "${position}">${position}<br>${image}</div>`;
 
       // resets colornum, so new tiles can have their color be determined.
       colornum = 0;
@@ -133,6 +137,11 @@ function makeBoard() {
       castleTile.dataset.castle = 1;
     }
   }
+
+  // Update the input announcer to its initial state
+  let positionAnnouncer = getElement("display");
+  positionAnnouncer.innerHTML = "Input: <strong>None</strong>";
+
 }
 
 // method that gets all the tiles vertically from a starting point. Only does so in one direction (up or down)
@@ -322,7 +331,7 @@ function getPawnDiagonals(pawnId, pawnLetter, pawnNumber, direction){
 // Gets all the enemy moves; player parameter is either 1 or 2
 // Mainly used to determine all the tiles a king cannot move to (for check & checkmate)
 function getAllEnemyMoves(player){
-  let color = (player == 1 ? "white" : "black");
+  let color = player.toLowerCase();
   let currentElement, currentPiece;
   let allMoves = [], enemyMoves = [];
 
@@ -362,8 +371,8 @@ function getAllEnemyMoves(player){
 
 // Compares a king's moves to all enemy pieces' moves. Prevents a king from moving to a tile where an enemy piece can move to, since the king would be in check.
 // playerNumber is either 1 or 2, and possibleMoves is the selected king's possible moves
-function checkKingMoves(playerNumber, possibleMoves){
-  let allEnemyMoves = getAllEnemyMoves(playerNumber);
+function checkKingMoves(player, possibleMoves){
+  let allEnemyMoves = getAllEnemyMoves(player);
   let currentEnemy, currentEnemyMoves;
   let tilesToRemove = [];
   for(let i = 1; i < possibleMoves.length;i++){
@@ -675,14 +684,13 @@ function getPossibleMoves(starting, piece) {
 let phase = 1;
 let startingTile;
 
-// function to move pieces.
-function move(p, st) { // p = phase of movement method, st = starting tile.
-  let tileId = getElement("tile").value;
-  let result, starting, chessPiece;
+// function to move pieces. Called in the audio method.
+function move(p, st, input) { // p = phase of movement method, st = starting tile, input = audio input
+  let tileId = input;
+  let result, starting, chessPiece, possibleMoves, nextPlayer;
   let playerMessage = getElement("playerTurn");
-  let player = (playerMessage.innerHTML.includes("Player 1") ? 1 : 2);
-  let possibleMoves;
-  let kingColor = (player == 1 ? "white" : "black");
+  let player = (playerMessage.innerHTML.includes("White") ? "White" : "Black");
+  let kingColor = player.toLowerCase();
   let kingId = document.querySelector(`img[src="chessPieces/${kingColor}Pieces/${kingColor[0]}_king.svg"]`).parentElement.id;
   switch (p) {
     // selection phase of movement method (phase 1); user selects a tile to move a piece from.
@@ -693,7 +701,7 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
           playerMessage.innerHTML = `Draw - Induced by players`;
           phase = 4;
         }else if(tileId.toLowerCase() == "decline"){
-          playerMessage.innerHTML = `Player ${playerMessage.dataset.draw}: Select a tile with a piece`;
+          playerMessage.innerHTML = `${playerMessage.dataset.draw}: Select a tile with a piece`;
           delete playerMessage.dataset.draw;
         }else{
           break
@@ -701,15 +709,13 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         break;
       }else{
         if(tileId.toLowerCase() == "draw"){
-          let nextPlayer = (player == 1 ? 2 : 1);
+          nextPlayer = (player == "White" ? "Black" : "White");
           playerMessage.dataset.draw = player;
-          playerMessage.innerHTML = `Player ${player} is requesting a draw - Player ${nextPlayer}, either "accept" or "decline" the offer`;
+          playerMessage.innerHTML = `${player} is requesting a draw - ${nextPlayer}, either "accept" or "decline" the offer`;
           break
         }
       }
 
-
-      // get id of tile of piece user wants to move. If it is invalid, 1st phase of move method fails & user must try again.
       if (checkArray(tileId, list) == false) { // if tileId is not in list, then it is invalid.
         break;
       }
@@ -720,8 +726,8 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
 
       if (chessPiece != null) {
         // Final check for ensuring players can only select their own pieces.
-        let colorCheck = (playerMessage.innerHTML.includes("1") ? "white" : "black");
-        //if(getPieceColor(chessPiece.src) == getPieceColor(colorCheck)){
+        let colorCheck = (playerMessage.innerHTML.includes("White") ? "white" : "black");
+        if(getPieceColor(chessPiece.src) == getPieceColor(colorCheck)){
           result = tileId;
 
           // method that gets possible moves. Also used to determine where a king cannot move, and if the king is in check or checkmate.
@@ -748,7 +754,7 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
               enPassantAttribute = getElement(enPassantId).dataset.enpassant;
               if(enPassantAttribute == player){
                 delete getElement(enPassantId).dataset.enpassant;
-                let colorFactor = (player == 1 ? -1 : 1);
+                let colorFactor = (player == "White" ? -1 : 1);
                 skippedId = enPassantId[0] + (parseInt(enPassantId[1]) + colorFactor);
                 delete getElement(skippedId).dataset.skipped;
               }
@@ -759,9 +765,9 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
           let substringFirstNumber = chessPiece.src.indexOf("_") + 1;
           let substringSecondNumber = chessPiece.src.indexOf(".svg");
           let pieceName = chessPiece.src.substring(substringFirstNumber, substringSecondNumber);
-          playerMessage.innerHTML = `Player ${player}: Selected ${pieceName} ${tileId} - Select a tile to move it to`;
+          playerMessage.innerHTML = `${player}: Selected ${pieceName} ${tileId} - Select a tile to move it to`;
         }
-      //}
+      }
       break;
 
     // actually moves the chess piece to its new tile; movement phase of move method.
@@ -780,15 +786,15 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
       }
       let targetTile = "";
 
-      // checks if the user entered a tile that the piece can actually move to; if not, restart movement phase
-      if (checkArray(tileId, possibleMoves) == false) {
+      // checks if the user entered a tile that the piece can actually move to; if not, restart movement phase; "deslect" & "D select" are the two most common options when saying "deslect" using the voice commands. 99% of the time it's deslect, with the other 1% being "D select", but since those are not "possible moves" per se, they are just added in the if-statement, since deselection by saying "deselect" is always an option
+      if (checkArray(tileId, possibleMoves) == false && tileId != "deselect" && tileId != "D select") {
         result = st;
         break;
       }
 
       // checks if the starting tile is different from the target tile. If different, that means the user is trying to move a piece to a new tile, in which case the movement method proceeds with actual movement. If the two tiles are the same, then you are trying to move a piece to the tile it is already on, in which case the piece is deselected. The user does not lose a turn.
       // THIS IS WHERE ACTUAL MOVEMENT LOGIC IS
-      if (tileId != st) {
+      if (tileId != st && tileId != "deselect" && tileId != "D select") { // "deslect" & "D select" are the two most common options when saying "deslect" using the voice commands. 99% of the time it's deslect, with the other 1% being "D select", so that's accounted for here to aid in deselecting a piece (do not initiate any piece movement)
         targetTile = getElement(tileId);
 
         // If there is a piece (img element) on the target tile, the user eliminates that piece by moving to the target tile.
@@ -808,7 +814,7 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         // Checks if a pawn has been moved 2 tiles from its starting position; if so, that is the first time, and en passant is an option for the next player. Data that is the current player's number is associated with the tile the pawn just landed on, making it an "en passant tile". Also adds "true" data to the skipped tile. Also handles when en passant is actually being done.
         if(chessPiece.src.includes("pawn")){
           let numOfTarget = parseInt(tileId[1]);
-          let colorFactor = (player == 1 ? 1 : -1);
+          let colorFactor = (player == "White" ? 1 : -1);
           if(Math.abs(numOfStarting - numOfTarget) > 1){ // Prepares a tile for potentially facing en passant
             targetTile.dataset.enpassant = player;
             let skippedTileId = st[0] + (numOfStarting + colorFactor);
@@ -860,16 +866,14 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
       phase = (pawnPromotionCheck ? 3 : 1); // phase 1 = selecting what piece to move (case 1), phase 3 = pawn promotion
       if(phase == 3){
         targetTile.classList.add("selected");
-        let input = getElement("tile");
-        input.placeholder = "enter piece";
       }
       // Need to determine which player it is, since if the current player moves, player needs to change; if current player deselected piece, it is still their turn.
-      let oppositePlayer = (player == 1 ? 2 : 1);
-      let nextPlayer = (successfulMove == true ? oppositePlayer : player);
-      playerMessage.innerHTML = (phase == 3 ? `Player ${nextPlayer}: Promote pawn at ${targetTile.innerHTML.substring(0,2)} to queen, bishop, knight, or rook` : `Player ${nextPlayer}: Select a tile with a piece`); // Update player message to either phase 2 selection or phase 3 pawn promotion
+      let oppositePlayer = (player == "White" ? "Black" : "White");
+      nextPlayer = (successfulMove == true && phase != 3 ? oppositePlayer : player);
+      playerMessage.innerHTML = (phase == 3 ? `${nextPlayer}: Promote pawn at ${targetTile.innerHTML.substring(0,2)} to queen, bishop, knight, or rook` : `${nextPlayer}: Select a tile with a piece`); // Update player message to either phase 2 selection or phase 3 pawn promotion
 
       // Determines if the king of the next player is in check after the current player has finished moving
-      kingColor = (player == 1 ? "black" : "white");
+      kingColor = (player == "White" ? "black" : "white");
       kingId = document.querySelector(`img[src="chessPieces/${kingColor}Pieces/${kingColor[0]}_king.svg"]`).parentElement.id;
       let enemyPieces = getAllEnemyMoves(nextPlayer);
       let amount = 0; // reflects how many pieces put a king in check
@@ -882,7 +886,7 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
 
       // Updated message if the next player is in check
       if(playerMessage.dataset.check){
-        playerMessage.innerHTML = `Player ${nextPlayer}: Check - Defend your king`;
+        playerMessage.innerHTML = `${nextPlayer}: Check - Defend your king`;
       }
       
       // If we're going to the next player, we need to determine if the current move just put the next player in checkmate.
@@ -913,14 +917,18 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
         let isInsufficient = determineInsufficientPieces(getAllPieceTiles()); // determines if there are insufficient pieces by either side for a checkmate
         // Handles logic for check & checkmate
         if(allEmpty || isInsufficient){
+          let positionAnnouncer = getElement("display");
           if(playerMessage.dataset.check){
-            oppositePlayer = (player == 1 ? 2 : 1);
-            playerMessage.innerHTML = `Checkmate - Player ${player} wins`;
+            oppositePlayer = (player == "White" ? "Black" : "White");
+            playerMessage.innerHTML = `Checkmate - ${player} wins`;
+            positionAnnouncer.innerHTML = "Checkmate";
           }else{
             if(isInsufficient){
               playerMessage.innerHTML = `Draw - Insufficient pieces for checkmate`;
+              positionAnnouncer.innerHTML = "Draw";
             }else{
-              playerMessage.innerHTML = `Draw - Player ${oppositePlayer} has no legal moves`;
+              playerMessage.innerHTML = `Draw - ${oppositePlayer} has no legal moves`;
+              positionAnnouncer.innerHTML = "Draw";
             }
           }
           phase = 4; // End phase; game over
@@ -929,204 +937,188 @@ function move(p, st) { // p = phase of movement method, st = starting tile.
       break;
     case 3:
       let pawnMessage = playerMessage.innerHTML;
-      let pawnTile = pawnMessage.substring(26,28); //Magic numbers are for indexing the playerMessage to get the pawn's coordinate
+      let pawnTile = pawnMessage.substring(23,25); //Magic numbers are for indexing the playerMessage to get the pawn's coordinate
+      nextPlayer = (player == "White" ? "Black" : "White")
       starting = getElement(pawnTile);
       chessPiece = starting.querySelector("img");
       let pawnColor = getPieceColor(chessPiece.src);
-
       let validPieces = ["queen","bishop","knight","rook"];
       if(checkArray(tileId.toLowerCase(), validPieces)){
         chessPiece.src = `chessPieces/${pawnColor}Pieces/${pawnColor[0]}_${tileId}.svg`;
-        phase = 1;
-        playerMessage.innerHTML = `Player ${player}: Select a tile with a piece`;
+        playerMessage.innerHTML = `${nextPlayer}: Select a tile with a piece`;
         starting.classList.remove("selected");
-        let input = getElement("tile");
-        input.placeholder = "enter tile position";
+        phase = 1;
+
+        // Determines if the king of the next player is in check after the current player has finished promoting their pawn
+        kingColor = (player == "White" ? "black" : "white");
+        kingId = document.querySelector(`img[src="chessPieces/${kingColor}Pieces/${kingColor[0]}_king.svg"]`).parentElement.id;
+        let enemyPieces = getAllEnemyMoves(nextPlayer);
+        let amount = 0; // reflects how many pieces put a king in check
+        for(let i = 0;i < enemyPieces.length;i++){
+          if(enemyPieces[i]["moves"].includes(kingId)){
+            playerMessage.dataset.check = true;
+            amount++;
+          }
+        }
+
+        // Updated message if the next player is in check
+        if(playerMessage.dataset.check){
+          playerMessage.innerHTML = `${nextPlayer}: Check - Defend your king`;
+        }
+
+        allEmpty = true; // If a player has no current moves, that could spell for draw or checkmate
+        if(amount < 2){ // if less than 2 piece sput a king in check, then it is possible that an ally piece can get a king out of check with a single move. If not, then no single move from any allied piece can get a king out of check
+          // We need to determine the possible moves of the next player, so we get all the moves the next player can make. If the player can make moves (does not include deselection, aka moving a piece to the tile it is currently on), then we can avoid draw/checkmate by having no moves
+          let nextPlayerPieces = getAllEnemyMoves(player);
+          let currentId, currentImg;
+          for(let i = 0; i < nextPlayerPieces.length;i++){
+            possibleMoves = [];
+            currentId = nextPlayerPieces[i]["tile"];
+            currentImg = nextPlayerPieces[i]["piece"];
+            possibleMoves = getPossibleMoves(currentId, currentImg);
+            if(currentImg.includes("king")){
+              possibleMoves = checkKingMoves(nextPlayer,possibleMoves);
+              possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, currentId, nextPlayer, kingId, true);
+            }else if(chessPiece != null){
+              possibleMoves = simulateMovesThatKeepKingSafe(possibleMoves, currentId, nextPlayer, kingId, false);
+            }
+            possibleMoves.shift();
+            if(possibleMoves.length != 0){
+              allEmpty = false;
+            }
+          }
+        }
+
+        let isInsufficient = determineInsufficientPieces(getAllPieceTiles()); // determines if there are insufficient pieces by either side for a checkmate
+        // Handles logic for check & checkmate
+        if(allEmpty || isInsufficient){
+          let positionAnnouncer = getElement("display");
+          if(playerMessage.dataset.check){
+            playerMessage.innerHTML = `Checkmate - ${player} wins`;
+            positionAnnouncer.innerHTML = "Checkmate";
+          }else{
+            if(isInsufficient){
+              playerMessage.innerHTML = `Draw - Insufficient pieces for checkmate`;
+              positionAnnouncer.innerHTML = "Draw";
+            }else{
+              playerMessage.innerHTML = `Draw - ${oppositePlayer} has no legal moves`;
+              positionAnnouncer.innerHTML = "Draw";
+            }
+          }
+          phase = 4; // End phase; game over
+        }
       }
     case 4:
       // Game over phase.
       break;
   }
 
-  getElement("tile").value = ""; //Resets text box
   return result;
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-////////////////////////////////////////////////////////////////////
-
 //voice recognition
-
-// function to start the voice recognition
-window.onload = function() {
-  window.onload = makeBoard();
-}
-
-let message = "";
-
-function audio(status) {
+let voiceMessage = ""; // Global voiceMessage stores the input value obtained when speaking
+// Function that enables audio listening when toggled is true & disables audio listening when toggled is false.
+// Listens for user input, and determines what the input is supposed to be in the context of the game, with help from the convert methods.
+// When toggled is false, that means the user has finished speaking and has locked in their choice, in which case the move method is called & that logic proceeds.
+function audio(toggled) {
+  let positionAnnouncer = getElement("display");
+  let playerMessage = getElement("playerTurn");
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (typeof SpeechRecognition !== "undefined") {
     const recognition = new SpeechRecognition();
     const onResult = function(event) {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
-        let res = event.results[i];
-        console.log("%cInterim: " + res[0].transcript, "color:green;");
-        if (res.isFinal) {
-          console.log("%cFinal: " + res[0].transcript, "color:red");
-          message = res[0].transcript;
-          let pos = document.getElementById("display");
-          if (turns < 5) {
-            message = convert("position", message);
-            if (checkArray(message, list) == true) {
-              pos.innerHTML = `Selected Position: <b>${message}</b>`;
-            } else {
-              pos.innerHTML = `Selected Position: <b>Invalid</b>. Please try again.`;
+        let voiceResults = event.results[i];
+        console.log("%cInterim: " + voiceResults[0].transcript, "color:green;"); // Logging what the audio detector initially hears
+        if (voiceResults.isFinal) {
+          console.log("%cFinal: " + voiceResults[0].transcript, "color:red"); // Logging what the audio detector determines is the final/actual message
+          let rawMessage = voiceResults[0].transcript;
+
+          // Determines what the input message will be depending on what is happening in the game.
+          if(playerMessage.innerHTML.includes("Promote")){
+            voiceMessage = convertStrangePieces(rawMessage);
+            if (checkArray(voiceMessage, pawnPromotionPieceNames)) {
+              positionAnnouncer.innerHTML = `Input: <b>${voiceMessage}</b>`;
             }
-          } else {
-            console.log("before" + message);
-            message = convert("piece", message)
-            console.log("after" + message);
-            let realPiece = "";
-            for (let i = 0; i < pieceNames.length; i++) {
-              let p = pieceNames[i].ideal;
-              if (p == message) {
-                realPiece = pieceNames[i].name;
-              }
+          }else if(playerMessage.innerHTML.includes("draw")){
+            if(checkArray(voiceMessage,["except","accept","decline"])){
+              positionAnnouncer.innerHTML = `Input: <b>Draw Accepted</b>`;
             }
-            console.log("message: " + message);
-            console.log("real piece" + realPiece);
-            if (checkArray(message, ["d", "ah", "cf", "bg"]) == true) {
-              pos.innerHTML = `Selected Piece: <b>${realPiece}</b>`;
-            } else {
-              pos.innerHTML = `Selected Piece: <b>Invalid</b>. Please try again.`;
+          }else{
+            voiceMessage = convertStrangeTiles(rawMessage);
+            if (checkArray(voiceMessage, list)) {
+              positionAnnouncer.innerHTML = `Input: <b>${voiceMessage}</b>`;
+            }else if(voiceMessage == "draw"){
+              positionAnnouncer.innerHTML = `Input: <b>Draw</b>`;
             }
           }
         }
       }
-    };
+    }
 
     recognition.continuous = true;
     recognition.lang = 'en-US';
     recognition.interimResults = true;
     recognition.addEventListener("result", onResult);
     recognition.start();
-    if (status == false) {
+    if (toggled == false) { // If toggled is false, move method logic executes
       recognition.stop();
-    }
-  }
-
-  if (status == false) {
-    let pos = document.getElementById("display");
-    if (turns < 5) {
-      move(message, status);
-      pos.innerHTML = `Selected Position: <b>None</b>`;
-      let element = document.getElementById(firstPos);
-      if (firstPos != secPos) {
-        if (checkString("img", element.innerHTML) != true) {
-          if (firstSelect == true) {
-            if (secPos != "") {
-              turns++;
-            }
-          }
-        } else {
-          turns++;
-        }
-      } else {
-        turns--;
-      }
-    } else if (turns >= 5) {
-      move(message, status);
-      pos.innerHTML = `Selected Position: <b>None</b>`;
-      if (turnSave % 2 == 0) {
-        turns = turnSave + 2;
-      } else {
-        turns = turnSave + 1;
-      }
-    }
-  }
-  if (turns == 4) {
-    turns = 0;
-  }
-  let directions = document.getElementById("directions");
-  if (status == false) {
-    if (turns == 0) {
-      directions.innerHTML = "<b>WHITE</b> - Press <b>START</b> and state the position of the piece you want to move then press <b>STOP</b>.";
-    } else if (turns == 2) {
-      directions.innerHTML = "<b>BLACK</b> - Press <b>START and state the position of the piece you want to move then press <b>STOP</b>.";
-    } else if (turns == 1) {
-      directions.innerHTML = "<b>WHITE</b> - Press <b>START</b> and state the position where you want to move your selected piece to then press <b>STOP</b>.";
-    } else if (turns == 3) {
-      directions.innerHTML = "<b>BLACK</b> - Press <b>START</b> and state the position where you want to move your selected piece to then press <b>STOP</b>";
+      startingTile = move(phase, startingTile, voiceMessage);
+      positionAnnouncer.innerHTML = `Input: <b>None</b>`;
     }
   }
 }
 
-//When saying certain coordinates, the values are strange. This array of json has those strange values and their ideal values (what they should be).
-let specials = [{ "actual": ["1/8", "88"], "ideal": "A8" },
+// When saying certain coordinates, the values are strange. This array of json has those strange values and their ideal values (what they should be).
+let specials = [{ "actual": ["1/8", "88", "A8", "h a", "ha", "aa", "a a", "AA", "AAA", "888", "a A8"], "ideal": "A8" },
 { "actual": ["87"], "ideal": "A7" },
 { "actual": ["Asics", "a sex", "a 6", "86"], "ideal": "A6" }, { "actual": ["see sex"], "ideal": "C6" }, { "actual": ["esox", "e-cigs", "e-cig"], "ideal": "E6" },
 { "actual": ["define", "Define"], "ideal": "D5" },
 { "actual": ["84"], "ideal": "A4" }, { "actual": ["before"], "ideal": "B4" },
 { "actual": ["AO3", "83"], "ideal": "A3" },
 { "actual": ["82"], "ideal": "A2" },
-{ "actual": ["do you want"], "ideal": "D1" }, { "actual": ["you won", "he won"], "ideal": "E1" }, { "actual": ["bb8", "ba"], "ideal": "B8" }];
+{ "actual": ["do you want"], "ideal": "D1" }, { "actual": ["you won", "he won", "Ewan", "Yvonne"], "ideal": "E1" }, { "actual": ["bb8", "ba"], "ideal": "B8" },{"actual": ["EA","e 8","ea","E A"], "ideal":"E8"}];
 
-let pieceNames = [{ "actual": ["Queen", "queen"], "ideal": "d", "name": "Queen" }, { "actual": ["night"], "ideal": "bg", "name": "Knight" }, { "actual": ["Bishop"], "ideal": "cf", "name": "Bishop" }, { "actual": ["Brooke", "rough", "Run", "Ruck"], "ideal": "ah", "name": "Rook" }]
+// Same goes for saying piece names during pawn promotion. The audio detector picks up strange values, so those values are mapped to their ideal, proper values to be used by the program.
+let strangePieceNames = [{ "actual": ["Queen", "queen"], "ideal": "queen"}, { "actual": ["night"], "ideal": "knight" }, { "actual": ["Bishop"], "ideal": "bishop" }, { "actual": ["Brooke", "rough", "Run", "Ruck"], "ideal": "rook" }];
 
-//Will convert a strange value to an ideal value.
-function convert(status, m) {
-  m = m.replace(" ", "");
-  if (status == "position") {
-    for (let i = 0; i < specials.length; i++) {
-      let list = specials[i].actual;
+// The names of all pieces a pawn can promote to
+let pawnPromotionPieceNames = ["queen","bishop","knight","rook"];
 
-      for (let x = 0; x < list.length; x++) {
-
-        let word = list[x];
-        if (word == m) {
-          m = specials[i].ideal;
-        }
-      }
-    }
-  } else if (status == "piece") {
-    for (let i = 0; i < pieceNames.length; i++) {
-      let list = pieceNames[i].actual;
-
-      for (let x = 0; x < list.length; x++) {
-
-        let word = list[x];
-        if (word == m) {
-          m = pieceNames[i].ideal;
-        }
+// Will convert a strange tile value to an ideal value.
+function convertStrangeTiles(voiceInput) {
+  voiceInput = voiceInput.replace(" ", "");
+  let currentSpecial, currentSpecialActuals;
+  for (let i = 0; i < specials.length; i++) {
+    currentSpecial = specials[i];
+    currentSpecialActuals = currentSpecial["actual"]; 
+    for (let j = 0; j < currentSpecialActuals.length; j++) {
+      let currentActual = currentSpecialActuals[j];
+      if (currentActual == voiceInput) {
+        voiceInput = currentSpecial["ideal"];
       }
     }
   }
-  m = m.toLowerCase();
-  m = m.replace(" ", "");
-  return m
+  let fixedVoiceInput = voiceInput.toLowerCase();
+  return fixedVoiceInput;
 }
 
-function checkArray(m, a) {
-  return a.includes(m);
-}
-
-function checkString(sequence, string) {
-  for (let i = 0; i < string.length - sequence.length + 1; i++) {
-    if (string.slice(i, i + sequence.length) == sequence) {
-      return true;
+// Will convert a strange piece value to an ideal piece value
+function convertStrangePieces(voiceInput) {
+  voiceInput = voiceInput.replace(" ", "");
+  let currentSpecial, currentSpecialActuals;
+  for (let i = 0; i < strangePieceNames.length; i++) {
+    currentSpecial = strangePieceNames[i];
+    currentSpecialActuals = currentSpecial["actual"]; 
+    for (let j = 0; j < currentSpecialActuals.length; j++) {
+      let currentActual = currentSpecialActuals[j];
+      if (currentActual == voiceInput) {
+        voiceInput = strangePieceNames[i]["ideal"];
+      }
     }
   }
+  let fixedVoiceInput = voiceInput.toLowerCase();
+  return fixedVoiceInput;
 }
